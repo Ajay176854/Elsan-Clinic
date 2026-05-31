@@ -1,0 +1,8 @@
+{
+  "name": "Elsan Clinic",
+  "description": "Expert Care for Every Family. Apollo-style family medical clinic application with simulated patient and admin portals.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
