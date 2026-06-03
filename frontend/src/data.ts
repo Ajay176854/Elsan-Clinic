@@ -1,4 +1,4 @@
-import { AdminUser, Doctor, Patient, ProHealthPackage, Service } from './types';
+import type { AdminUser, Doctor, Patient, ProHealthPackage, Service } from './types';
 
 export const CLINIC_INFO = {
   name: "Elsan Clinic",

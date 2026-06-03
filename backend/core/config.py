@@ -10,8 +10,10 @@ class Settings(BaseSettings):
     CLOUDINARY_CLOUD_NAME: str | None = None
     CLOUDINARY_API_KEY: str | None = None
     CLOUDINARY_API_SECRET: str | None = None
+    GROQ_API_KEY: str | None = None
 
     class Config:
         env_file = ".env"
+        extra = "ignore"
 
 settings = Settings()
