@@ -92,7 +92,7 @@ export default function LandingPage() {
   const [activeTab, setActiveTab] = useState('home');
 
   return (
-    <AuroraBackground className="min-h-screen !h-auto min-w-full flex flex-col justify-start items-stretch font-sans text-slate-800" showRadialGradient={false}>
+    <AuroraBackground className="min-h-screen min-w-full flex flex-col justify-start items-stretch font-sans text-slate-800" showRadialGradient={true}>
       {/* Main Navbar */}
       <nav className="bg-white shadow-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto flex justify-between items-center border-b border-slate-100">
