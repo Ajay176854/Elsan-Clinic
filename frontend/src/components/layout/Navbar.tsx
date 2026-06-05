@@ -16,8 +16,8 @@ export default function Navbar({ activeTab, onTabChange }: NavbarProps) {
       <nav className="bg-white shadow-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto flex justify-between items-center border-b border-slate-100">
           <div className="flex items-center gap-3 py-4 px-4">
-            <div className="bg-blue-600 p-2.5 rounded-xl text-white shadow-sm flex-shrink-0">
-              <Stethoscope size={28} />
+            <div className="flex-shrink-0 w-11 h-11 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center p-1">
+              <img src="/logo.png" alt="Elsan Clinic Logo" className="w-full h-full object-contain" />
             </div>
             <div className="hidden sm:block">
               <h1 className="text-2xl font-bold text-slate-800 tracking-tight leading-none">Elsan Clinic</h1>

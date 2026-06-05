@@ -8,6 +8,8 @@ import Link from 'next/link';
 import { DoctorsView, ServicesView, ContactView, BookView } from '../components/PublicViews';
 import { HealthPackagesView, EmergencyView, InternationalPatientsView, HealthLibraryView } from '../components/ApolloViews';
 import AIToolsView from '../components/AIToolsView';
+import { AuroraBackground } from '@/components/ui/aurora-background';
+import HeroWidgets from '@/components/HeroWidgets';
 
 function HeroVideoCarousel() {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -49,9 +51,6 @@ function HeroVideoCarousel() {
       ))}
 
       <div className="absolute inset-0 flex flex-col justify-center p-8 md:p-16 md:pb-28 text-white z-10 max-w-3xl">
-        <div className="inline-flex items-center gap-2 bg-blue-800/80 backdrop-blur-md border border-blue-600 px-4 py-1.5 rounded-full text-blue-100 text-sm font-semibold mb-6 shadow-inner tracking-wide w-max">
-          <Star size={16} className="text-yellow-400" /> Powered by ELSAN AI & Gemini 3.1 Ultra
-        </div>
 
         <motion.div
           key={currentSlide}
@@ -59,18 +58,18 @@ function HeroVideoCarousel() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4 tracking-tight drop-shadow-md">{slides[currentSlide].title}</h1>
-          <p className="text-blue-50 text-lg md:text-xl mb-8 drop-shadow max-w-2xl">{slides[currentSlide].subtitle}</p>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-serif font-medium leading-tight mb-4 tracking-tight drop-shadow-md">{slides[currentSlide].title}</h1>
+          <p className="text-blue-50 text-lg md:text-xl font-sans font-light mb-8 drop-shadow max-w-2xl">{slides[currentSlide].subtitle}</p>
         </motion.div>
 
         <div className="flex flex-col sm:flex-row gap-4 mt-2">
-          <Link href="/login" className="bg-orange-500 hover:bg-orange-400 text-white font-semibold flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg shadow-lg transition">
+          <Link href="/login" className="bg-orange-500 hover:bg-orange-400 text-white font-semibold flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 active:scale-95 transition-all duration-300">
             <Calendar size={20} />
             Book Appointment
           </Link>
-          <Link href="/login" className="bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white font-semibold flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg shadow-lg transition border border-white/30">
+          <Link href="#services" className="bg-white/20 hover:bg-white/30 backdrop-blur-md text-white font-semibold flex items-center justify-center gap-2 px-6 py-3.5 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 active:scale-95 transition-all duration-300 border border-white/30">
             <Activity size={20} />
-            Talk to ELSAN AI
+            Our Services
           </Link>
         </div>
       </div>
@@ -93,17 +92,17 @@ export default function LandingPage() {
   const [activeTab, setActiveTab] = useState('home');
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 font-sans text-slate-800">
+    <AuroraBackground className="min-h-screen !h-auto min-w-full flex flex-col justify-start items-stretch font-sans text-slate-800" showRadialGradient={false}>
       {/* Main Navbar */}
       <nav className="bg-white shadow-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto flex justify-between items-center border-b border-slate-100">
           <div className="flex items-center gap-3 py-4 px-4">
-            <div className="bg-blue-600 p-2.5 rounded-xl text-white shadow-sm flex-shrink-0">
-              <Stethoscope size={28} />
+            <div className="flex-shrink-0 w-11 h-11 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center p-1">
+              <img src="/logo.png" alt="Elsan Clinic Logo" className="w-full h-full object-contain" />
             </div>
             <div className="hidden sm:block">
               <h1 className="text-2xl font-bold text-slate-800 tracking-tight leading-none">Elsan Clinic</h1>
-              <p className="text-[11px] font-bold text-teal-600 uppercase tracking-widest mt-0.5">Powered by Gemini AI</p>
+              <p className="text-[11px] font-bold text-teal-600 uppercase tracking-widest mt-0.5">Trusted Healthcare</p>
             </div>
           </div>
 
@@ -118,7 +117,7 @@ export default function LandingPage() {
             <Link href="/login" className="text-sm font-bold text-slate-600 hover:text-blue-600 transition">
               Staff Login
             </Link>
-            <button onClick={() => setActiveTab('book')} className="bg-orange-500 text-white px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-orange-600 transition shadow-sm">
+            <button onClick={() => setActiveTab('book')} className="bg-orange-500 text-white px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-orange-600 active:scale-95 hover:-translate-y-0.5 transition-all duration-300 shadow-sm hover:shadow-md">
               Book Appt
             </button>
           </div>
@@ -129,18 +128,7 @@ export default function LandingPage() {
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8">
         {activeTab === 'home' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-12">
-            {/* AI Daily Tip */}
-            <div className="bg-gradient-to-r from-teal-50 to-blue-50 border border-teal-100 p-4 rounded-xl flex items-start gap-4 shadow-sm">
-              <div className="bg-white p-2 rounded-lg text-teal-600 shadow-sm shrink-0 border border-teal-100">
-                <Activity size={24} />
-              </div>
-              <div>
-                <h4 className="text-teal-800 font-bold text-sm tracking-wide uppercase mb-1 flex items-center gap-2">
-                  💡 ELSAN AI Daily Tip
-                </h4>
-                <p className="text-slate-700 text-sm">Drinking 8 glasses of water daily can reduce your risk of kidney stones by up to 40%. Stay hydrated! - <span className="font-semibold text-teal-700">Gemini 3.1 Health Insight</span></p>
-              </div>
-            </div>
+
 
             <HeroVideoCarousel />
 
@@ -162,12 +150,12 @@ export default function LandingPage() {
                     <button
                       key={i}
                       onClick={() => setActiveTab(item.tab)}
-                      className={`flex flex-col items-center justify-center p-4 rounded-xl text-center transition border shadow-sm hover:shadow-md ${item.primary ? 'bg-orange-50 border-orange-200 hover:bg-orange-100 text-orange-900 group' : item.highlight ? 'bg-teal-50 border-teal-200 hover:bg-teal-100 text-teal-900 group' : 'bg-white border-slate-100 hover:border-blue-300 hover:bg-slate-50 text-slate-700 group'}`}
+                      className={`flex flex-col items-center justify-center p-4 rounded-xl text-center transition-all duration-300 border shadow-sm hover:shadow-xl hover:-translate-y-1 active:scale-95 ${item.primary ? 'bg-orange-50 border-orange-200 hover:bg-orange-100 text-orange-900 group' : item.highlight ? 'bg-teal-50 border-teal-200 hover:bg-teal-100 text-teal-900 group' : 'bg-white border-slate-100 hover:border-blue-300 hover:bg-slate-50 text-slate-700 group'}`}
                     >
                       <div className={`mb-3 p-3 rounded-full ${item.primary ? 'bg-orange-500 text-white' : item.highlight ? 'bg-teal-500 text-white' : 'bg-blue-50 text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors'}`}>
                         <item.icon size={24} />
                       </div>
-                      <span className="font-semibold text-[13px] leading-tight">{item.title}</span>
+                      <span className="font-sans font-medium text-[13px] leading-tight">{item.title}</span>
                     </button>
                   ))}
                 </div>
@@ -179,16 +167,67 @@ export default function LandingPage() {
                 { label: 'of Service', value: '20+ Years', icon: Star },
                 { label: 'Families Served', value: '10,000+', icon: Users },
                 { label: 'Online Telemedicine', value: '24/7', icon: Stethoscope },
-                { label: 'AI Health Assistant', value: 'Gemini 3.1', icon: Activity },
+                { label: 'Patient Satisfaction', value: '98%', icon: HeartPulse },
               ].map((stat, i) => (
-                <div key={i} className="bg-white border border-slate-200 rounded-xl p-6 text-center shadow-sm hover:shadow-md transition">
+                <motion.div whileHover={{ y: -8 }} transition={{ type: "spring", stiffness: 300 }} key={i} className="bg-white border border-slate-200 rounded-xl p-6 text-center shadow-sm hover:shadow-xl transition-shadow duration-300 cursor-default">
                   <div className="mx-auto w-12 h-12 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mb-4">
                     <stat.icon size={24} />
                   </div>
                   <h3 className="text-2xl font-bold text-slate-800">{stat.value}</h3>
                   <p className="text-sm font-medium text-slate-500 mt-1">{stat.label}</p>
-                </div>
+                </motion.div>
               ))}
+            </section>
+
+            {/* Intelligent Care Section */}
+            <section className="max-w-6xl mx-auto px-4 xl:px-0 py-16">
+              <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
+                <div className="space-y-6">
+                  <div className="inline-flex items-center gap-2 bg-teal-50 text-teal-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-teal-100">
+                    Why Choose Us
+                  </div>
+                  <h2 className="text-3xl md:text-5xl font-serif font-semibold text-slate-900 leading-tight">
+                    Healthcare You Can <em className="text-teal-600 not-italic">Trust</em>
+                  </h2>
+                  <p className="text-slate-600 text-lg font-sans font-light leading-relaxed">
+                    We combine world-class medical expertise with genuine care for each patient — because your wellbeing is more than just a diagnosis.
+                  </p>
+                  
+                  <div className="space-y-6 pt-6">
+                    <div className="flex gap-4 items-start">
+                      <div className="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center shrink-0">
+                        <User className="text-teal-600" size={24} />
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-semibold text-slate-900 mb-1">Experienced & Certified Specialists</h4>
+                        <p className="text-slate-600 text-sm font-light leading-relaxed">Our team includes 12+ board-certified doctors with advanced training across multiple specialties, ensuring expert care at every visit.</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-4 items-start">
+                      <div className="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center shrink-0">
+                        <Building2 className="text-teal-600" size={24} />
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-semibold text-slate-900 mb-1">Modern, Hygienic Facilities</h4>
+                        <p className="text-slate-600 text-sm font-light leading-relaxed">Our clinic is equipped with cutting-edge diagnostic tools, sterile treatment areas, and a comfortable patient-first environment.</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-4 items-start">
+                      <div className="w-12 h-12 rounded-xl bg-teal-50 flex items-center justify-center shrink-0">
+                        <Clock className="text-teal-600" size={24} />
+                      </div>
+                      <div>
+                        <h4 className="text-lg font-semibold text-slate-900 mb-1">Flexible Hours & Emergency Care</h4>
+                        <p className="text-slate-600 text-sm font-light leading-relaxed">Open 7 days a week with extended evening hours. 24/7 emergency support available with on-call physician coverage.</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="relative">
+                   <HeroWidgets />
+                </div>
+              </div>
             </section>
 
             <section className="bg-gradient-to-r from-teal-900 to-blue-900 rounded-2xl p-8 md:p-12 text-white shadow-lg flex flex-col md:flex-row items-center justify-between gap-8 max-w-6xl mx-auto">
@@ -196,12 +235,12 @@ export default function LandingPage() {
                 <div className="inline-flex items-center gap-2 bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">
                   Predict • Prevent • Overcome
                 </div>
-                <h2 className="text-3xl md:text-4xl font-bold">Elsan ProHealth</h2>
-                <p className="text-blue-100 max-w-xl text-lg">India's most powerful preventive health management program. AI-assisted personalized health risk assessments mapped to your exact clinical profile.</p>
+                <h2 className="text-3xl md:text-4xl font-serif font-semibold">Elsan ProHealth</h2>
+                <p className="text-blue-100 max-w-xl text-lg font-sans font-light">India's most powerful preventive health management program. AI-assisted personalized health risk assessments mapped to your exact clinical profile.</p>
               </div>
               <div className="bg-white p-6 rounded-xl text-slate-800 shrink-0 w-full md:w-80 shadow-2xl">
                 <h3 className="font-bold text-xl mb-4 border-b pb-2">Book a Health Check</h3>
-                <button onClick={() => setActiveTab('prohealth')} className="w-full inline-block text-center bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition shadow-md">
+                <button onClick={() => setActiveTab('prohealth')} className="w-full inline-block text-center bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-lg hover:-translate-y-1 active:scale-95 transition-all duration-300 shadow-md hover:shadow-xl">
                   Explore Packages
                 </button>
               </div>
@@ -211,8 +250,8 @@ export default function LandingPage() {
             <section className="max-w-6xl mx-auto px-4 xl:px-0 mt-8">
               <div className="flex flex-col md:flex-row justify-between items-end mb-8">
                 <div>
-                  <h2 className="text-3xl font-bold text-blue-900 mb-2 border-l-4 border-blue-600 pl-3">Centres of Clinical Excellence</h2>
-                  <p className="text-slate-600 pl-4 max-w-2xl">World-class specialized care across multiple medical disciplines, driven by research and technology.</p>
+                  <h2 className="text-3xl font-serif font-medium text-blue-900 mb-2 border-l-4 border-blue-600 pl-3">Centres of Clinical Excellence</h2>
+                  <p className="text-slate-600 font-sans font-light pl-4 max-w-2xl">World-class specialized care across multiple medical disciplines, driven by research and technology.</p>
                 </div>
                 <button onClick={() => setActiveTab('treatments')} className="hidden md:flex items-center gap-1 text-blue-600 hover:text-blue-800 font-semibold">
                   View All Specialties <ChevronRight size={18} />
@@ -312,7 +351,7 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="space-y-4">
             <div className="flex items-center gap-2">
-              <div className="bg-blue-600 p-2 rounded-lg text-white"><Stethoscope size={20} /></div>
+              <div className="w-8 h-8 bg-white rounded-lg p-0.5 flex items-center justify-center"><img src="/logo.png" alt="Elsan Clinic Logo" className="w-full h-full object-contain" /></div>
               <h2 className="text-xl font-bold text-white">Elsan Clinic</h2>
             </div>
             <p className="text-sm">Part of Elsan Foundation.<br />{CLINIC_INFO.tagline}</p>
@@ -339,6 +378,6 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
-    </div>
+    </AuroraBackground>
   );
 }

@@ -1,18 +1,21 @@
-
 import type { Metadata } from "next";
-import { Inter, Geist } from "next/font/google";
+import { DM_Sans, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 
 import Providers from "../components/Providers";
 import { cn } from "@/lib/utils";
+import FloatingContact from "@/components/FloatingContact";
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
-
-const inter = Inter({ subsets: ["latin"] });
+const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
+const cormorant = Cormorant_Garamond({ 
+  subsets: ["latin"], 
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-cormorant" 
+});
 
 export const metadata: Metadata = {
-  title: "Elsan Clinic",
-  description: "Advanced Clinic Management System",
+  title: "Elsan Clinic — Trusted Healthcare",
+  description: "Advanced Clinic Management System. Comprehensive medical care delivered with compassion.",
 };
 
 export default function RootLayout({
@@ -21,9 +24,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn("font-sans", geist.variable)}>
-      <body className={inter.className}>
-        <Providers>{children}</Providers>
+    <html lang="en" className={cn(dmSans.variable, cormorant.variable, "scroll-smooth")}>
+      <body className="font-sans antialiased bg-slate-50 text-slate-900 relative">
+        <Providers>
+          {children}
+          <FloatingContact />
+        </Providers>
       </body>
     </html>
   );

@@ -13,7 +13,7 @@ export default function Footer({ onTabChange }: FooterProps) {
       <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8">
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <div className="bg-blue-600 p-2 rounded-lg text-white"><Stethoscope size={20} /></div>
+            <div className="w-8 h-8 bg-white rounded-lg p-0.5 flex items-center justify-center"><img src="/logo.png" alt="Elsan Clinic Logo" className="w-full h-full object-contain" /></div>
             <h2 className="text-xl font-bold text-white">Elsan Clinic</h2>
           </div>
           <p className="text-sm">Part of Elsan Foundation.<br />{CLINIC_INFO.tagline}</p>
