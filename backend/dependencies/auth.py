@@ -34,7 +34,13 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession
     except jwt.PyJWTError:
         raise credentials_exception
         
-    result = await db.execute(select(User).where(User.id == user_id))
+    import uuid
+    try:
+        uuid_obj = uuid.UUID(user_id)
+    except ValueError:
+        raise credentials_exception
+        
+    result = await db.execute(select(User).where(User.id == uuid_obj))
     user = result.scalars().first()
     if user is None:
         raise credentials_exception

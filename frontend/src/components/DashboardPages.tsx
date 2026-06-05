@@ -1,3 +1,5 @@
+"use client";
+
 import { FileText, Plus, Search, Phone, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { doctorApi, patientApi, appointmentApi } from "../services/api";

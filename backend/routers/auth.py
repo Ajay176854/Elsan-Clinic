@@ -39,7 +39,7 @@ async def get_me(current_user: User = Depends(get_current_user)):
         full_name=current_user.full_name,
         email=current_user.email,
         phone=current_user.phone,
-        role=current_user.role.value,
+        role=current_user.role.value if hasattr(current_user.role, 'value') else current_user.role,
         is_active=current_user.is_active
     )
 

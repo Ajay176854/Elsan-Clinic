@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { BrainCircuit, Activity, Calculator, Apple, FileBarChart, ChevronRight } from 'lucide-react';

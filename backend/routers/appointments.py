@@ -36,3 +36,58 @@ async def create_appointment(
     await db.commit()
     await db.refresh(new_appt)
     return new_appt
+
+@router.post("/public")
+async def create_public_appointment(
+    data: dict,
+    db: AsyncSession = Depends(get_db)
+):
+    from models.domain import Patient, Doctor, User
+    import random
+    
+    # Create or get patient
+    phone = data.get("phone")
+    result = await db.execute(select(Patient).where(Patient.phone == phone))
+    patient = result.scalar_one_or_none()
+    
+    if not patient:
+        patient_code = f"PAT{random.randint(10000, 99999)}"
+        patient = Patient(
+            patient_code=patient_code,
+            full_name=data.get("full_name"),
+            age=int(data.get("age", 30)),
+            gender=data.get("gender", "Unknown"),
+            phone=phone
+        )
+        db.add(patient)
+        await db.flush()
+
+    # Get doctor by name or fallback to first
+    doc_name = data.get("doctor_name", "")
+    doctor = None
+    if doc_name and doc_name != "Any Available Doctor":
+        result = await db.execute(select(Doctor).join(User).where(User.full_name.ilike(f"%{doc_name}%")))
+        doctor = result.scalar_one_or_none()
+    
+    if not doctor:
+        result = await db.execute(select(Doctor))
+        doctor = result.scalars().first()
+        if not doctor:
+            raise HTTPException(status_code=400, detail="No doctors available in the clinic.")
+            
+    appt_time_str = data.get("appointment_time", "10:00")
+    if not appt_time_str:
+        appt_time_str = "10:00"
+
+    new_appt = Appointment(
+        patient_id=patient.id,
+        doctor_id=doctor.id,
+        appointment_date=datetime.strptime(data.get("appointment_date"), "%Y-%m-%d").date(),
+        appointment_time=datetime.strptime(appt_time_str, "%H:%M").time(),
+        status=AppointmentStatus.SCHEDULED,
+        notes=data.get("notes")
+    )
+    db.add(new_appt)
+    await db.commit()
+    await db.refresh(new_appt)
+    return {"message": "Appointment created successfully", "appointment_id": str(new_appt.id)}

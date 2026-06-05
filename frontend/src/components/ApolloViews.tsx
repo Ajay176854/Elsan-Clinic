@@ -1,3 +1,5 @@
+"use client";
+
 import { motion } from 'framer-motion';
 import { Phone, HeartPulse, CheckCircle2, ShieldAlert, Plane, Globe, Calculator } from 'lucide-react';
 

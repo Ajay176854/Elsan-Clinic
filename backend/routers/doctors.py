@@ -46,6 +46,13 @@ async def create_doctor(
     doctor = await service.create_doctor(data)
     return map_response(doctor)
 
+@router.get("/public", response_model=List[DoctorResponse])
+async def list_public_doctors(
+    service: DoctorService = Depends(get_doctor_service)
+):
+    doctors = await service.get_all_doctors()
+    return [map_response(d) for d in doctors]
+
 @router.get("", response_model=List[DoctorResponse])
 @require_roles(["SUPER_ADMIN"])
 async def list_doctors(

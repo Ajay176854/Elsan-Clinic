@@ -12,8 +12,12 @@ def get_utc_now():
 
 class RoleEnum(str, enum.Enum):
     SUPER_ADMIN = "SUPER_ADMIN"
+    DIRECTOR = "DIRECTOR"
     RECEPTIONIST = "RECEPTIONIST"
+    NURSE = "NURSE"
+    PHARMACY = "PHARMACY"
     DOCTOR = "DOCTOR"
+    ANALYST = "ANALYST"
 
 class User(Base):
     __tablename__ = "users"

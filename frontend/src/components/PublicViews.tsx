@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight, ArrowRight, Activity, HeartPulse, Stethoscope, Pill, Baby, Users, Microscope, Calendar, Star, Building2, MapPin, User, Phone, BookOpen, Ambulance, BrainCircuit, FileText } from 'lucide-react';
@@ -291,6 +293,34 @@ function AboutView() {
 }
 
 export function DoctorsView() {
+  const [doctors, setDoctors] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8009/api/v1';
+        const res = await fetch(`${apiUrl}/doctors/public`);
+        if (res.ok) {
+          const data = await res.json();
+          const formatted = data.map((d: any) => ({
+            id: d.id,
+            name: d.full_name,
+            role: `${d.experience_years} Years Experience`,
+            qualifications: d.qualification ? d.qualification.split(', ') : [],
+            fellowships: [],
+            phone: d.phone,
+            consultationType: d.consultation_timings || 'In-Clinic',
+            specialties: d.specialization ? d.specialization.split(', ') : []
+          }));
+          setDoctors(formatted);
+        }
+      } catch (e) {
+        console.error("Failed to fetch doctors", e);
+      }
+    };
+    fetchDoctors();
+  }, []);
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
       <div className="text-center space-y-4 mb-10">
@@ -299,7 +329,7 @@ export function DoctorsView() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {DOCTORS.map((doc, i) => (
+        {doctors.map((doc, i) => (
           <div key={i} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col">
             <div className="bg-blue-50 border-b border-slate-200 p-6">
               <div className="flex justify-between items-start">
@@ -498,6 +528,77 @@ export function ContactView() {
 }
 
 export function BookView() {
+  const [loading, setLoading] = React.useState(false);
+  const [success, setSuccess] = React.useState(false);
+  const [doctors, setDoctors] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8007/api/v1';
+        const res = await fetch(`${apiUrl}/doctors/public`);
+        if (res.ok) {
+          const data = await res.json();
+          setDoctors(data);
+        }
+      } catch (e) {
+        console.error("Failed to fetch doctors", e);
+      }
+    };
+    fetchDoctors();
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    const form = e.target as HTMLFormElement;
+
+    const data = {
+      full_name: (form.elements.namedItem('fullName') as HTMLInputElement).value,
+      phone: (form.elements.namedItem('phone') as HTMLInputElement).value,
+      age: parseInt((form.elements.namedItem('age') as HTMLInputElement).value),
+      gender: (form.elements.namedItem('gender') as HTMLSelectElement).value,
+      appointment_date: (form.elements.namedItem('date') as HTMLInputElement).value,
+      appointment_time: (form.elements.namedItem('time') as HTMLInputElement).value,
+      doctor_name: (form.elements.namedItem('doctor') as HTMLSelectElement).value,
+      notes: (form.elements.namedItem('notes') as HTMLTextAreaElement).value,
+    };
+
+    try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8007/api/v1';
+      const res = await fetch(`${apiUrl}/appointments/public`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+      if (res.ok) {
+        setSuccess(true);
+        form.reset();
+      } else {
+        let errStr = "Please try again.";
+        try { const errData = await res.json(); errStr = errData.detail || errStr; } catch(e) {}
+        alert(`Failed to book appointment: ${errStr}`);
+      }
+    } catch (err) {
+      alert("Network error.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (success) {
+    return (
+       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-xl mx-auto text-center space-y-6 py-12">
+          <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+             <Calendar size={48} />
+          </div>
+          <h2 className="text-3xl font-bold text-slate-800">Appointment Confirmed!</h2>
+          <p className="text-slate-600 text-lg">Thank you! Your appointment has been scheduled and safely stored in our database. We look forward to seeing you.</p>
+          <button onClick={() => setSuccess(false)} className="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition">Book Another</button>
+       </motion.div>
+    );
+  }
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-3xl mx-auto space-y-8">
       <div className="text-center space-y-4 mb-10">
@@ -506,34 +607,50 @@ export function BookView() {
       </div>
       
       <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-xl">
-        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); alert('Appointment requested successfully!'); }}>
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="grid md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-700">Full Name</label>
-              <input required type="text" className="w-full border border-slate-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="John Doe" />
+              <input name="fullName" required type="text" className="w-full border border-slate-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="John Doe" />
             </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-700">Phone Number</label>
-              <input required type="tel" className="w-full border border-slate-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="+91 XXXXX XXXXX" />
+              <input name="phone" required type="tel" className="w-full border border-slate-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="+91 XXXXX XXXXX" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700">Age</label>
+              <input name="age" required type="number" min="0" max="120" className="w-full border border-slate-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="30" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700">Gender</label>
+              <select name="gender" className="w-full border border-slate-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+              </select>
             </div>
             <div className="space-y-2">
               <label className="text-sm font-semibold text-slate-700">Preferred Date</label>
-              <input required type="date" className="w-full border border-slate-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none" />
+              <input name="date" required type="date" className="w-full border border-slate-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none" />
             </div>
             <div className="space-y-2">
+              <label className="text-sm font-semibold text-slate-700">Preferred Time</label>
+              <input name="time" required type="time" className="w-full border border-slate-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none" />
+            </div>
+            <div className="space-y-2 md:col-span-2">
               <label className="text-sm font-semibold text-slate-700">Preferred Doctor</label>
-              <select className="w-full border border-slate-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
-                <option>Any Available Doctor</option>
-                {DOCTORS.map(d => <option key={d.name}>{d.name}</option>)}
+              <select name="doctor" className="w-full border border-slate-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none bg-white">
+                <option value="Any Available Doctor">Any Available Doctor</option>
+                {doctors.map(d => <option key={d.id} value={d.full_name}>{d.full_name}</option>)}
               </select>
             </div>
           </div>
           <div className="space-y-2">
             <label className="text-sm font-semibold text-slate-700">Reason for Visit / Symptoms</label>
-            <textarea className="w-full border border-slate-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none h-24" placeholder="Briefly describe your symptoms..." />
+            <textarea name="notes" className="w-full border border-slate-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none h-24" placeholder="Briefly describe your symptoms..." />
           </div>
-          <button type="submit" className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-md transition text-lg flex justify-center items-center gap-2">
-            <Calendar size={20} /> Request Appointment
+          <button type="submit" disabled={loading} className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-md transition text-lg flex justify-center items-center gap-2 disabled:opacity-70">
+            <Calendar size={20} /> {loading ? 'Booking...' : 'Request Appointment'}
           </button>
         </form>
       </div>
