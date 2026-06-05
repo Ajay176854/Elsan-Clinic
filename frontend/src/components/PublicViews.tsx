@@ -535,7 +535,7 @@ export function BookView() {
   React.useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8007/api/v1';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8009/api/v1';
         const res = await fetch(`${apiUrl}/doctors/public`);
         if (res.ok) {
           const data = await res.json();
@@ -565,7 +565,7 @@ export function BookView() {
     };
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8007/api/v1';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8009/api/v1';
       const res = await fetch(`${apiUrl}/appointments/public`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

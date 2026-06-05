@@ -17,7 +17,7 @@ export function useLogin() {
     mutationFn: ({ email, password }: { email: string; password: string }) =>
       authService.login(email, password),
     onSuccess: () => {
-      router.push('/dashboard');
+      router.push('/admin');
     },
   });
 }

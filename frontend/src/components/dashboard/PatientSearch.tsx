@@ -1,5 +1,8 @@
 import { Plus, Search, Loader2 } from "lucide-react";
 import { usePatients } from "../../hooks";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 
 export default function PatientSearch() {
   const { data: patients = [], isLoading } = usePatients();
@@ -8,13 +11,13 @@ export default function PatientSearch() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-slate-800">Patient Database</h2>
-        <button className="bg-orange-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-orange-600 transition">
-          <Plus size={18} /> Register Patient
-        </button>
+        <Button className="bg-orange-500 hover:bg-orange-600">
+          <Plus className="mr-2 h-4 w-4" /> Register Patient
+        </Button>
       </div>
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-        <input type="text" placeholder="Search by name, phone or ID..." className="w-full border border-slate-300 rounded-lg pl-10 pr-4 py-2.5 focus:ring-2 focus:ring-blue-500 outline-none" />
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 h-4 w-4" />
+        <Input placeholder="Search by name, phone or ID..." className="pl-10 h-11 bg-white" />
       </div>
       <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
         {isLoading ? (
@@ -22,26 +25,26 @@ export default function PatientSearch() {
         ) : patients.length === 0 ? (
           <div className="p-8 text-center text-slate-500">No patients registered yet. Enter a search term or add a patient.</div>
         ) : (
-          <table className="w-full text-left">
-            <thead className="bg-slate-50 border-b border-slate-200 text-slate-600">
-              <tr>
-                <th className="p-4 font-semibold">Patient Code</th>
-                <th className="p-4 font-semibold">Name</th>
-                <th className="p-4 font-semibold">Contact</th>
-                <th className="p-4 font-semibold">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
+          <Table>
+            <TableHeader className="bg-slate-50">
+              <TableRow>
+                <TableHead>Patient Code</TableHead>
+                <TableHead>Name</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {patients.map((p: any, i: number) => (
-                <tr key={i} className="hover:bg-slate-50">
-                  <td className="p-4 font-medium text-blue-600">{p.patient_code}</td>
-                  <td className="p-4 font-medium text-slate-800">{p.full_name}</td>
-                  <td className="p-4 text-slate-600">{p.phone}</td>
-                  <td className="p-4 text-blue-600 font-medium cursor-pointer hover:underline">View History</td>
-                </tr>
+                <TableRow key={i}>
+                  <TableCell className="font-medium text-blue-600">{p.patient_code}</TableCell>
+                  <TableCell className="font-medium text-slate-800">{p.full_name}</TableCell>
+                  <TableCell className="text-slate-600">{p.phone}</TableCell>
+                  <TableCell className="text-blue-600 font-medium cursor-pointer hover:underline">View History</TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         )}
       </div>
     </div>

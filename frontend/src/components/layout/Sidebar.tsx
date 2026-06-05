@@ -10,27 +10,27 @@ const getMenuItems = (role: string) => {
   const items = [];
   
   if (['SUPER_ADMIN', 'DIRECTOR', 'ANALYST'].includes(role)) {
-    items.push({ name: "Overview", href: "/dashboard", icon: LayoutDashboard });
+    items.push({ name: "Overview", href: "/admin", icon: LayoutDashboard });
   }
   
   if (['SUPER_ADMIN', 'RECEPTIONIST', 'NURSE'].includes(role)) {
-    items.push({ name: "Appointments", href: "/dashboard/appointments", icon: Calendar });
-    items.push({ name: "Patients", href: "/dashboard/patients", icon: Users });
+    items.push({ name: "Appointments", href: "/admin/appointments", icon: Calendar });
+    items.push({ name: "Patients", href: "/admin/patients", icon: Users });
   }
   
   if (['SUPER_ADMIN', 'DIRECTOR'].includes(role)) {
-    items.push({ name: "Doctors", href: "/dashboard/doctors", icon: UserRound });
-    items.push({ name: "Staff", href: "/dashboard/staff", icon: Users });
+    items.push({ name: "Doctors", href: "/admin/doctors", icon: UserRound });
+    items.push({ name: "Staff", href: "/admin/staff", icon: Users });
   }
   
   if (['SUPER_ADMIN', 'DOCTOR'].includes(role)) {
-    items.push({ name: "My Appointments", href: "/dashboard/appointments", icon: Calendar });
-    items.push({ name: "Prescriptions", href: "/dashboard/prescriptions", icon: FileText });
-    items.push({ name: "Telemedicine", href: "/dashboard/telemedicine", icon: Video });
+    items.push({ name: "My Appointments", href: "/admin/appointments", icon: Calendar });
+    items.push({ name: "Prescriptions", href: "/admin/prescriptions", icon: FileText });
+    items.push({ name: "Telemedicine", href: "/admin/telemedicine", icon: Video });
   }
 
   if (['SUPER_ADMIN'].includes(role)) {
-    items.push({ name: "Settings", href: "/dashboard/settings", icon: Settings });
+    items.push({ name: "Settings", href: "/admin/settings", icon: Settings });
   }
 
   return items.filter((v, i, a) => a.findIndex(t => (t.name === v.name)) === i);
