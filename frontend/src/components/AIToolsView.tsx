@@ -104,8 +104,8 @@ function AIChatTool({ title, icon: Icon, color, desc, systemPrompt, initialMessa
     setIsLoading(true);
 
     try {
-      // Assuming backend is running on port 8000
-      const response = await fetch('http://localhost:8000/api/chat', {
+      // Assuming backend is running on port 8009
+      const response = await fetch('http://localhost:8009/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

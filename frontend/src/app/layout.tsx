@@ -4,7 +4,6 @@ import "./globals.css";
 
 import Providers from "../components/Providers";
 import { cn } from "@/lib/utils";
-import FloatingContact from "@/components/FloatingContact";
 
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
 const cormorant = Cormorant_Garamond({ 
@@ -28,7 +27,6 @@ export default function RootLayout({
       <body className="font-sans antialiased bg-slate-50 text-slate-900 relative">
         <Providers>
           {children}
-          <FloatingContact />
         </Providers>
       </body>
     </html>

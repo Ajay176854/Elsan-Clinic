@@ -5,20 +5,21 @@ from core.config import settings
 
 async def run_migrations():
     # Use isolation_level="AUTOCOMMIT" to allow ALTER TYPE ... ADD VALUE outside of a transaction block
-    engine = create_async_engine(settings.DATABASE_URL, isolation_level="AUTOCOMMIT", connect_args={"statement_cache_size": 0})
+    connect_args = {"statement_cache_size": 0} if "postgresql" in settings.DATABASE_URL else {}
+    engine = create_async_engine(settings.DATABASE_URL, isolation_level="AUTOCOMMIT", connect_args=connect_args)
     async with engine.connect() as conn:
         print("Running schema updates...")
         
         # 1. Update patients table columns
         try:
-            await conn.execute(text("ALTER TABLE patients ADD COLUMN IF NOT EXISTS email VARCHAR(255);"))
-            await conn.execute(text("ALTER TABLE patients ADD COLUMN IF NOT EXISTS emergency_contact VARCHAR(100);"))
-            await conn.execute(text("ALTER TABLE patients ADD COLUMN IF NOT EXISTS allergies TEXT;"))
-            await conn.execute(text("ALTER TABLE patients ADD COLUMN IF NOT EXISTS current_symptoms TEXT;"))
-            await conn.execute(text("ALTER TABLE patients ADD COLUMN IF NOT EXISTS notes TEXT;"))
-            await conn.execute(text("ALTER TABLE patients ADD COLUMN IF NOT EXISTS registered_by_id UUID REFERENCES users(id) ON DELETE SET NULL;"))
-            await conn.execute(text("ALTER TABLE patients ADD COLUMN IF NOT EXISTS registered_by_name VARCHAR(150);"))
-            await conn.execute(text("ALTER TABLE patients ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT TRUE;"))
+            await conn.execute(text("ALTER TABLE patients ADD COLUMN email VARCHAR(255);"))
+            await conn.execute(text("ALTER TABLE patients ADD COLUMN emergency_contact VARCHAR(100);"))
+            await conn.execute(text("ALTER TABLE patients ADD COLUMN allergies TEXT;"))
+            await conn.execute(text("ALTER TABLE patients ADD COLUMN current_symptoms TEXT;"))
+            await conn.execute(text("ALTER TABLE patients ADD COLUMN notes TEXT;"))
+            await conn.execute(text("ALTER TABLE patients ADD COLUMN registered_by_id UUID REFERENCES users(id) ON DELETE SET NULL;"))
+            await conn.execute(text("ALTER TABLE patients ADD COLUMN registered_by_name VARCHAR(150);"))
+            await conn.execute(text("ALTER TABLE patients ADD COLUMN is_active BOOLEAN DEFAULT TRUE;"))
             print("Successfully updated patients table columns.")
         except Exception as e:
             print(f"Error updating patients columns: {e}")
@@ -80,8 +81,9 @@ async def run_migrations():
                     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
                 );
             """))
-            await conn.execute(text("ALTER TABLE admissions ADD COLUMN IF NOT EXISTS admission_number VARCHAR(50) UNIQUE;"))
-            await conn.execute(text("ALTER TABLE admissions ADD COLUMN IF NOT EXISTS attender_mobile_number VARCHAR(20);"))
+            await conn.execute(text("ALTER TABLE admissions ADD COLUMN admission_number VARCHAR(50);"))
+            await conn.execute(text("CREATE UNIQUE INDEX IF NOT EXISTS ix_admissions_number ON admissions(admission_number);"))
+            await conn.execute(text("ALTER TABLE admissions ADD COLUMN attender_mobile_number VARCHAR(20);"))
             await conn.execute(text("""
                 CREATE TABLE IF NOT EXISTS admission_daily_visits (
                     id UUID PRIMARY KEY,
