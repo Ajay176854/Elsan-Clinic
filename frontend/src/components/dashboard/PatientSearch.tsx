@@ -144,7 +144,7 @@ export default function PatientSearch() {
                         <Button variant="outline" size="sm" onClick={() => handleViewPatient(p.id)} title="View Profile">
                           <Eye className="h-4 w-4 text-blue-600" />
                         </Button>
-                        {user?.role !== 'DOCTOR' && (
+                        {user?.role !== 'DOCTOR' && user?.role !== 'SUPER_ADMIN' && user?.role !== 'DIRECTOR' && (
                           <Button variant="outline" size="sm" onClick={() => handleCreateVisit(p.id)} title="Create Visit">
                             <CalendarPlus className="h-4 w-4 text-emerald-600" />
                           </Button>
