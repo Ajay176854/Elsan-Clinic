@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Phone, Loader2, CheckCircle, UserPlus, Clock, CalendarCheck, FileCheck } from "lucide-react";
-import { useAppointments, useDoctors, useAssignDoctor, useUpdateAppointmentStatus, useCreateVisit, usePatients } from "../../hooks";
+import { useAppointments, useDoctors, useAssignDoctor, useUpdateAppointmentStatus, useCreateVisit, usePatients, useUser } from "../../hooks";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Button } from "../ui/button";
 
@@ -10,9 +10,12 @@ export default function AppointmentCard() {
   const { data: appointments = [], isLoading } = useAppointments();
   const { data: doctors = [] } = useDoctors();
   const { data: patients = [] } = usePatients();
+  const { data: user } = useUser();
   const { mutateAsync: assignDoctor, isPending: isAssigning } = useAssignDoctor();
   const { mutateAsync: updateStatus, isPending: isUpdating } = useUpdateAppointmentStatus();
   const { mutateAsync: createVisit } = useCreateVisit();
+  
+  const isAdmin = user && ['SUPER_ADMIN', 'DIRECTOR'].includes(user.role);
   
   const [activeTab, setActiveTab] = useState<TabType>('today');
   const [selectedDoctors, setSelectedDoctors] = useState<Record<string, string>>({});
@@ -110,17 +113,19 @@ export default function AppointmentCard() {
 
   let displayAppts: any[] = [];
   if (activeTab === 'today') displayAppts = todaysQueue;
-  else if (activeTab === 'unassigned') displayAppts = unassignedAppts;
+  else if (activeTab === 'unassigned' && !isAdmin) displayAppts = unassignedAppts;
   else if (activeTab === 'upcoming') displayAppts = upcomingAppts;
   else if (activeTab === 'completed') displayAppts = completedAppts;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
-        <h2 className="text-2xl font-bold text-slate-800">Appointments (Reception)</h2>
+        <h2 className="text-2xl font-bold text-slate-800">{isAdmin ? "Appointments Queue" : "Appointments (Reception)"}</h2>
         <div className="flex flex-wrap gap-1 bg-slate-100 p-1 rounded-lg">
           <TabButton active={activeTab === 'today'} onClick={() => setActiveTab('today')} count={todaysQueue.length} icon={<Clock size={16}/>} label="Today's Queue" color="text-blue-700" />
-          <TabButton active={activeTab === 'unassigned'} onClick={() => setActiveTab('unassigned')} count={unassignedAppts.length} icon={<UserPlus size={16}/>} label="Not Assigned" color="text-orange-700" />
+          {!isAdmin && (
+            <TabButton active={activeTab === 'unassigned'} onClick={() => setActiveTab('unassigned')} count={unassignedAppts.length} icon={<UserPlus size={16}/>} label="Not Assigned" color="text-orange-700" />
+          )}
           <TabButton active={activeTab === 'upcoming'} onClick={() => setActiveTab('upcoming')} count={upcomingAppts.length} icon={<CalendarCheck size={16}/>} label="Upcoming" color="text-purple-700" />
           <TabButton active={activeTab === 'completed'} onClick={() => setActiveTab('completed')} count={completedAppts.length} icon={<FileCheck size={16}/>} label="Completed" color="text-emerald-700" />
         </div>
@@ -208,25 +213,25 @@ export default function AppointmentCard() {
                   <div className="flex items-center justify-between border-t border-slate-100 pt-3">
                     <div className="text-sm">
                       <span className="text-slate-500">Assigned to:</span>
-                      <p className="font-semibold text-slate-800">Dr. {doctorName}</p>
+                      <p className="font-semibold text-slate-800">{doctorName ? `Dr. ${doctorName}` : 'Not Assigned'}</p>
                     </div>
                     
-                    {appt.status === 'SCHEDULED' && activeTab === 'today' && (
+                    {appt.status === 'SCHEDULED' && activeTab === 'today' && !isAdmin && (
                       <button 
                         onClick={() => handleCheckIn(appt)}
                         disabled={isProcessing}
-                        className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-100 transition-colors flex items-center gap-1 disabled:opacity-50"
+                        className="bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-blue-100 transition-colors flex items-center gap-1 disabled:opacity-50 cursor-pointer"
                       >
                         {isProcessing ? <Loader2 className="w-3 h-3 animate-spin" /> : <CheckCircle size={14} />} 
                         Check In
                       </button>
                     )}
                     
-                    {appt.status === 'CHECKED_IN' && activeTab === 'today' && (
+                    {appt.status === 'CHECKED_IN' && activeTab === 'today' && !isAdmin && (
                       <button 
                         onClick={() => handleComplete(appt.id)}
                         disabled={isProcessing}
-                        className="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-100 transition-colors flex items-center gap-1 disabled:opacity-50"
+                        className="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-emerald-100 transition-colors flex items-center gap-1 disabled:opacity-50 cursor-pointer"
                       >
                         {isProcessing ? <Loader2 className="w-3 h-3 animate-spin" /> : <FileCheck size={14} />} 
                         Mark Completed
