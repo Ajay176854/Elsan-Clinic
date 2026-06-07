@@ -12,11 +12,7 @@ const getMenuItems = (role: string, basePath: string) => {
   items.push({ name: "Overview", href: basePath, icon: LayoutDashboard });
   
   if (['SUPER_ADMIN', 'RECEPTIONIST', 'NURSE'].includes(role)) {
-    if (role === 'DOCTOR') {
-      items.push({ name: "My Appointments", href: `${basePath}/appointments`, icon: Calendar });
-    } else {
-      items.push({ name: "Appointments", href: `${basePath}/appointments`, icon: Calendar });
-    }
+    items.push({ name: "Appointments", href: `${basePath}/appointments`, icon: Calendar });
     items.push({ name: "Patients", href: `${basePath}/patients`, icon: Users });
     items.push({ name: "Inpatients", href: `${basePath}/inpatients`, icon: BedDouble });
   }
@@ -30,6 +26,7 @@ const getMenuItems = (role: string, basePath: string) => {
     if (!items.some(i => i.name === "My Appointments" || i.name === "Appointments")) {
       items.push({ name: "My Appointments", href: `${basePath}/appointments`, icon: Calendar });
     }
+    items.push({ name: "My Patients", href: `${basePath}/patients`, icon: Users });
     items.push({ name: "Prescriptions", href: `${basePath}/prescriptions`, icon: FileText });
     items.push({ name: "Telemedicine", href: `${basePath}/telemedicine`, icon: Video });
   }
