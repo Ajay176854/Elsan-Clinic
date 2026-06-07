@@ -19,10 +19,18 @@ export default function DashboardPage() {
     return null;
   }
 
-  const role = user.role;
-  const isSuperAdmin = role === 'SUPER_ADMIN';
+  if (typeof window !== 'undefined') {
+    const role = user.role;
+    if (['SUPER_ADMIN', 'DIRECTOR'].includes(role)) {
+      window.location.href = '/elsanclinic/admin-dashboard';
+    } else if (role === 'DOCTOR') {
+      window.location.href = '/elsanclinic/doctor-dashboard';
+    } else {
+      window.location.href = '/elsanclinic/staff-dashboard';
+    }
+  }
 
-  return <DashboardOverview user={user} />;
+  return <div className="flex min-h-screen items-center justify-center bg-slate-50"><Loader2 className="animate-spin text-blue-600 w-8 h-8" /></div>;
 }
 
 function DashboardOverview({ user }: { user: any }) {

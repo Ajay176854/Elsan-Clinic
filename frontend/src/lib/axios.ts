@@ -55,7 +55,16 @@ api.interceptors.response.use(
         processQueue(refreshError, null);
         // If refresh fails, we must redirect to login
         if (typeof window !== 'undefined') {
-          window.location.href = '/login';
+          const path = window.location.pathname;
+          let redirectUrl = '/login';
+          if (path.includes('admin')) {
+            redirectUrl = '/elsanclinic/admin-login';
+          } else if (path.includes('staff')) {
+            redirectUrl = '/elsanclinic/staff-login';
+          } else if (path.includes('doctor')) {
+            redirectUrl = '/elsanclinic/doctor-login';
+          }
+          window.location.href = redirectUrl;
         }
         return Promise.reject(refreshError);
       } finally {

@@ -6,35 +6,41 @@ import { usePathname } from 'next/navigation';
 import { cn } from "../../lib/utils";
 import { useUser, useLogout } from "../../hooks";
 
-const getMenuItems = (role: string) => {
+const getMenuItems = (role: string, basePath: string) => {
   const items = [];
   
-  items.push({ name: "Overview", href: "/admin", icon: LayoutDashboard });
+  items.push({ name: "Overview", href: basePath, icon: LayoutDashboard });
   
   if (['SUPER_ADMIN', 'RECEPTIONIST', 'NURSE'].includes(role)) {
-    items.push({ name: "Appointments", href: "/admin/appointments", icon: Calendar });
-    items.push({ name: "Patients", href: "/admin/patients", icon: Users });
-    items.push({ name: "Inpatients", href: "/admin/inpatients", icon: BedDouble });
+    if (role === 'DOCTOR') {
+      items.push({ name: "My Appointments", href: `${basePath}/appointments`, icon: Calendar });
+    } else {
+      items.push({ name: "Appointments", href: `${basePath}/appointments`, icon: Calendar });
+    }
+    items.push({ name: "Patients", href: `${basePath}/patients`, icon: Users });
+    items.push({ name: "Inpatients", href: `${basePath}/inpatients`, icon: BedDouble });
   }
   
   if (['SUPER_ADMIN', 'DIRECTOR'].includes(role)) {
-    items.push({ name: "Doctors", href: "/admin/doctors", icon: UserRound });
-    items.push({ name: "Staff", href: "/admin/staff", icon: Users });
+    items.push({ name: "Doctors", href: `${basePath}/doctors`, icon: UserRound });
+    items.push({ name: "Staff", href: `${basePath}/staff`, icon: Users });
   }
   
   if (['SUPER_ADMIN', 'DOCTOR'].includes(role)) {
-    items.push({ name: "My Appointments", href: "/admin/appointments", icon: Calendar });
-    items.push({ name: "Prescriptions", href: "/admin/prescriptions", icon: FileText });
-    items.push({ name: "Telemedicine", href: "/admin/telemedicine", icon: Video });
+    if (!items.some(i => i.name === "My Appointments" || i.name === "Appointments")) {
+      items.push({ name: "My Appointments", href: `${basePath}/appointments`, icon: Calendar });
+    }
+    items.push({ name: "Prescriptions", href: `${basePath}/prescriptions`, icon: FileText });
+    items.push({ name: "Telemedicine", href: `${basePath}/telemedicine`, icon: Video });
   }
 
   if (['SUPER_ADMIN'].includes(role)) {
-    items.push({ name: "Medicines", href: "/admin/medicines", icon: Pill });
-    items.push({ name: "WhatsApp", href: "/admin/whatsapp", icon: MessageCircle });
-    items.push({ name: "Reports", href: "/admin/reports", icon: BarChart3 });
-    items.push({ name: "Settings", href: "/admin/settings", icon: Settings });
-    items.push({ name: "Audit Logs", href: "/admin/audit-logs", icon: ShieldAlert });
-    items.push({ name: "Permissions", href: "/admin/permissions", icon: Lock });
+    items.push({ name: "Medicines", href: `${basePath}/medicines`, icon: Pill });
+    items.push({ name: "WhatsApp", href: `${basePath}/whatsapp`, icon: MessageCircle });
+    items.push({ name: "Reports", href: `${basePath}/reports`, icon: BarChart3 });
+    items.push({ name: "Settings", href: `${basePath}/settings`, icon: Settings });
+    items.push({ name: "Audit Logs", href: `${basePath}/audit-logs`, icon: ShieldAlert });
+    items.push({ name: "Permissions", href: `${basePath}/permissions`, icon: Lock });
   }
 
   return items.filter((v, i, a) => a.findIndex(t => (t.name === v.name)) === i);
@@ -44,6 +50,15 @@ export default function Sidebar() {
   const location = usePathname();
   const { data: user, isLoading } = useUser();
   const logout = useLogout();
+
+  let basePath = "/admin";
+  if (location.startsWith("/elsanclinic/admin-dashboard")) {
+    basePath = "/elsanclinic/admin-dashboard";
+  } else if (location.startsWith("/elsanclinic/staff-dashboard")) {
+    basePath = "/elsanclinic/staff-dashboard";
+  } else if (location.startsWith("/elsanclinic/doctor-dashboard")) {
+    basePath = "/elsanclinic/doctor-dashboard";
+  }
 
   return (
     <div className="hidden border-r bg-white md:block w-64 lg:w-72 shadow-sm relative">
@@ -63,7 +78,7 @@ export default function Sidebar() {
         </div>
         <div className="flex-1 py-4">
           <nav className="grid items-start px-4 text-sm font-medium gap-1">
-            {!isLoading && getMenuItems(user?.role || '').map((item) => (
+            {!isLoading && getMenuItems(user?.role || '', basePath).map((item) => (
               <Link
                 key={item.name}
                 href={item.href}

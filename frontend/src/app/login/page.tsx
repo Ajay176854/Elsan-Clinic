@@ -1,101 +1,131 @@
 "use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Loader2, HeartPulse } from 'lucide-react';
-import { Button } from "../../components/ui/button";
-import { Input } from "../../components/ui/input";
-import { Label } from "../../components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/ui/card";
-import { loginSchema, type LoginFormData } from '../../schemas';
-import { authService } from '../../services';
+import { Stethoscope, Users, Shield, HeartPulse, ArrowRight, Home } from 'lucide-react';
+import Link from 'next/link';
 
 export default function LoginPage() {
-  const router = useRouter();
-  const [error, setError] = useState<string | null>(null);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { isSubmitting },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
+  const portals = [
+    {
+      title: "Doctor Portal",
+      description: "Access your clinical workspace, review appointments, write digital prescriptions, and conduct telemedicine calls.",
+      icon: Stethoscope,
+      href: "/elsanclinic/doctor-login",
+      color: "from-teal-500 to-emerald-600",
+      accent: "teal",
+      shadow: "shadow-teal-100/50",
+      hoverBg: "hover:border-teal-300",
+      tag: "Clinicians & Specialists"
     },
-  });
-
-  const onSubmit = async (data: LoginFormData) => {
-    setError(null);
-    try {
-      await authService.login(data.email, data.password);
-      router.push('/admin');
-    } catch (err: any) {
-      setError(err.response?.data?.detail || 'Invalid credentials. Please try again.');
+    {
+      title: "Staff & Reception",
+      description: "Manage patient registrations, schedule appointments, coordinate bed admissions, and front-desk clinic operations.",
+      icon: Users,
+      href: "/elsanclinic/staff-login",
+      color: "from-sky-500 to-blue-600",
+      accent: "blue",
+      shadow: "shadow-blue-100/50",
+      hoverBg: "hover:border-blue-300",
+      tag: "Front Desk & Nursing"
+    },
+    {
+      title: "Admin Dashboard",
+      description: "Access executive analytics, manage system settings, configure doctor/staff directories, and audit security logs.",
+      icon: Shield,
+      href: "/elsanclinic/admin-login",
+      color: "from-slate-700 to-slate-900",
+      accent: "slate",
+      shadow: "shadow-slate-200/50",
+      hoverBg: "hover:border-slate-400",
+      tag: "Executive & IT Admin"
     }
-  };
+  ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-      <div className="w-full max-w-md">
-        <div className="flex flex-col items-center justify-center mb-8">
-          <div className="bg-blue-600 p-3 rounded-full text-white mb-4 shadow-lg shadow-blue-200">
-            <HeartPulse className="h-8 w-8" />
+    <div className="min-h-screen flex flex-col justify-between bg-slate-50 relative overflow-hidden font-sans">
+      {/* Background ambient glows */}
+      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-blue-100 rounded-full blur-[120px] opacity-60 pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-teal-100 rounded-full blur-[120px] opacity-60 pointer-events-none" />
+
+      {/* Header */}
+      <header className="w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between z-10 relative">
+        <Link href="/" className="flex items-center gap-2.5">
+          <div className="flex-shrink-0 w-10 h-10 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center p-1.5">
+            <img src="/logo.png" alt="Elsan Clinic Logo" className="w-full h-full object-contain" />
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Elsan Clinic</h1>
-          <p className="text-slate-500 mt-2">Management System Portal</p>
+          <div>
+            <h1 className="text-lg font-bold text-slate-800 tracking-tight leading-none">Elsan Clinic</h1>
+            <p className="text-[9px] font-bold text-teal-600 uppercase tracking-widest mt-0.5">Management Portal</p>
+          </div>
+        </Link>
+        <Link 
+          href="/" 
+          className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 bg-white px-3.5 py-2 rounded-lg border border-slate-100 shadow-sm transition-all active:scale-95"
+        >
+          <Home size={14} /> Back to Home
+        </Link>
+      </header>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col items-center justify-center px-4 py-8 z-10 relative">
+        <div className="text-center max-w-2xl mb-12">
+          <div className="inline-flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border border-blue-100/50 mb-4 shadow-sm">
+            <HeartPulse size={12} className="animate-pulse" /> Secure System Gateway
+          </div>
+          <h2 className="text-3xl md:text-5xl font-bold text-slate-900 tracking-tight leading-tight">
+            Select Your Portal to Sign In
+          </h2>
+          <p className="text-slate-500 text-md md:text-lg font-light mt-3 leading-relaxed">
+            Welcome to the Elsan Clinic Hospital Management System. Please select your designated access role below to proceed to login.
+          </p>
         </div>
 
-        <Card className="shadow-xl shadow-slate-200/50 border border-slate-100">
-          <CardHeader className="text-center pb-6">
-            <CardTitle className="text-2xl font-bold text-slate-800">Welcome back</CardTitle>
-            <CardDescription className="text-slate-500 text-sm">Enter your email and password to sign in</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              {error && (
-                <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100 text-center font-medium">
-                  {error}
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <Label htmlFor="username">Email / Username</Label>
-                <Input
-                  id="username"
-                  type="text"
-                  {...register('email')}
-                  placeholder="name@elsan.com"
-                  className="transition-all"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  {...register('password')}
-                  placeholder="••••••••"
-                  className="transition-all"
-                />
-              </div>
-
-              <Button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full mt-4 bg-blue-600 hover:bg-blue-700"
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl w-full">
+          {portals.map((portal, idx) => {
+            const Icon = portal.icon;
+            return (
+              <div 
+                key={idx}
+                className={`group bg-white border border-slate-150 rounded-2xl p-6 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col justify-between ${portal.hoverBg}`}
               >
-                {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                Sign In
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
+                <div>
+                  <div className="flex justify-between items-start mb-6">
+                    <div className={`p-3 rounded-xl bg-gradient-to-br ${portal.color} text-white shadow-lg ${portal.shadow}`}>
+                      <Icon size={24} />
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-slate-500 px-2.5 py-1 rounded-full">
+                      {portal.tag}
+                    </span>
+                  </div>
+                  
+                  <h3 className="text-xl font-bold text-slate-800 group-hover:text-blue-600 transition-colors">
+                    {portal.title}
+                  </h3>
+                  
+                  <p className="text-slate-500 text-sm mt-3 leading-relaxed">
+                    {portal.description}
+                  </p>
+                </div>
+
+                <div className="mt-8">
+                  <Link 
+                    href={portal.href}
+                    className={`flex items-center justify-center gap-2 w-full bg-slate-50 group-hover:bg-blue-600 group-hover:text-white border border-slate-150 group-hover:border-blue-600 text-slate-700 font-semibold text-sm py-3 px-4 rounded-xl transition-all duration-300 shadow-sm`}
+                  >
+                    Enter Portal <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="w-full text-center py-6 border-t border-slate-100 z-10 bg-white/50 backdrop-blur-sm">
+        <p className="text-slate-400 text-xs">
+          © {new Date().getFullYear()} Elsan Clinic Management System. Authorized personnel access only.
+        </p>
+      </footer>
     </div>
   );
 }
