@@ -7,7 +7,7 @@ export default function LoginPage() {
   const portals = [
     {
       title: "Doctor Portal",
-      description: "Access your clinical workspace, review appointments, write digital prescriptions, and conduct telemedicine calls.",
+      description: "Access your clinical workspace, review appointments, and write digital prescriptions.",
       icon: Stethoscope,
       href: "/elsanclinic/doctor-login",
       color: "from-teal-500 to-emerald-600",

@@ -28,7 +28,6 @@ const getMenuItems = (role: string, basePath: string) => {
     }
     items.push({ name: "My Patients", href: `${basePath}/patients`, icon: Users });
     items.push({ name: "Prescriptions", href: `${basePath}/prescriptions`, icon: FileText });
-    items.push({ name: "Telemedicine", href: `${basePath}/telemedicine`, icon: Video });
   }
 
   if (['SUPER_ADMIN'].includes(role)) {
