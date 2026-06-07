@@ -91,9 +91,11 @@ export default function PatientSearch() {
           <Button variant="outline" className="border-slate-200" onClick={handleDownloadCSV} disabled={displayPatients.length === 0}>
             Download CSV
           </Button>
-          <Button className="bg-orange-500 hover:bg-orange-600" onClick={() => setIsRegModalOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> Register Patient
-          </Button>
+          {user?.role !== 'SUPER_ADMIN' && user?.role !== 'DIRECTOR' && (
+            <Button className="bg-orange-500 hover:bg-orange-600" onClick={() => setIsRegModalOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" /> Register Patient
+            </Button>
+          )}
         </div>
       </div>
       
