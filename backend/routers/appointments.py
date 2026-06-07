@@ -37,6 +37,53 @@ async def create_appointment(
     await db.refresh(new_appt)
     return new_appt
 
+@router.get("/public/check-availability")
+async def check_availability(
+    doctor_name: str,
+    date: str,
+    time: str,
+    db: AsyncSession = Depends(get_db)
+):
+    from models.domain import Doctor, User
+    
+    doctor = None
+    if doctor_name and doctor_name != "Any Available Doctor":
+        result = await db.execute(select(Doctor).join(User).where(User.full_name.ilike(f"%{doctor_name}%")))
+        doctor = result.scalar_one_or_none()
+    
+    if not doctor:
+        result = await db.execute(select(Doctor))
+        doctor = result.scalars().first()
+        if not doctor:
+            return {"available": True}
+            
+    try:
+        check_date = datetime.strptime(date, "%Y-%m-%d").date()
+        # Clean up time if user provided things like '10:00 AM'
+        time_clean = time.strip().lower().replace(' ', '')
+        if 'am' in time_clean or 'pm' in time_clean:
+            check_time = datetime.strptime(time.strip(), "%I:%M %p").time()
+        else:
+            check_time = datetime.strptime(time.strip(), "%H:%M").time()
+    except ValueError:
+        # If time parsing fails, we'll just allow it and let the final POST handle strict parsing or default
+        return {"available": True}
+        
+    result = await db.execute(
+        select(Appointment).where(
+            Appointment.doctor_id == doctor.id,
+            Appointment.appointment_date == check_date,
+            Appointment.appointment_time == check_time,
+            Appointment.status != AppointmentStatus.CANCELLED
+        )
+    )
+    existing_appt = result.scalars().first()
+    
+    if existing_appt:
+        return {"available": False}
+        
+    return {"available": True}
+
 @router.post("/public")
 async def create_public_appointment(
     data: dict,

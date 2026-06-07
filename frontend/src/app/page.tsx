@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { Stethoscope, Clock, FileText, User, Pill, Phone, BrainCircuit, Activity, HeartPulse, Users, Calendar, Star, Building2, BookOpen, Ambulance, Globe, ChevronRight, ChevronDown, CheckCircle2, MapPin, Menu, X as XIcon, Quote, Shield } from 'lucide-react';
+import { Stethoscope, Clock, FileText, User, Pill, Phone, BrainCircuit, Activity, HeartPulse, Users, Calendar, Star, Building2, BookOpen, Ambulance, Globe, ChevronRight, ChevronDown, CheckCircle2, MapPin, Menu, X as XIcon, Quote, Shield, ArrowRight, Bot } from 'lucide-react';
 import { AnimatePresence } from 'framer-motion';
 import { CLINIC_INFO, SERVICES } from '../data';
 import Link from 'next/link';
@@ -17,19 +17,19 @@ function HeroVideoCarousel({ setActiveTab }: { setActiveTab: (tab: string) => vo
   const [currentSlide, setCurrentSlide] = useState(0);
   const slides = [
     {
-      videoUrl: "/video3.mp4",
+      videoUrl: "/video3.mp4?v=3",
       posterUrl: "https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?w=2000&q=80",
       title: "Advanced Medical Technology",
       subtitle: "Equipped with state-of-the-art facilities for precise diagnostics and treatment."
     },
     {
-      videoUrl: "/video2.mp4",
+      videoUrl: "/video2.mp4?v=3",
       posterUrl: "https://images.unsplash.com/photo-1579684385127-1ef15d508118?w=2000&q=80",
       title: "Compassionate Healthcare",
       subtitle: "Our dedicated team provides personalized care for your faster recovery."
     },
     {
-      videoUrl: "/video1.mp4",
+      videoUrl: "/video1.mp4?v=3",
       posterUrl: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=2000&q=80",
       title: "Expert Care for Every Family",
       subtitle: "Serving over 10,000 families in Chennai for more than 20 years. Intelligently delivered by ELSAN AI."
@@ -71,9 +71,9 @@ function HeroVideoCarousel({ setActiveTab }: { setActiveTab: (tab: string) => vo
             muted 
             loop 
             playsInline 
-            className="absolute inset-0 w-full h-full object-cover object-center scale-[1.08] origin-center" 
+            className="absolute inset-0 w-full h-full object-cover object-center" 
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent pointer-events-none" />
         </div>
       ))}
 
@@ -97,9 +97,18 @@ function HeroVideoCarousel({ setActiveTab }: { setActiveTab: (tab: string) => vo
             <Calendar size={20} />
             Book Appointment
           </button>
-          <button onClick={() => setActiveTab('treatments')} className="bg-white/15 hover:bg-white/25 backdrop-blur-md text-white font-semibold flex items-center justify-center gap-2 px-8 py-4 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 active:scale-95 transition-all duration-300 border border-white/30 text-base">
-            <Activity size={20} />
-            Our Services
+          <button onClick={() => {
+            const text = "Hi Elsan Clinic, could you please provide your clinic address and contact details?\n\nAlso, I would like to book an appointment. Here are my details:\n\n*Name:*\n*Age:*\n*Phone:*\n*Doctor Preference:*\n*Preferred Date & Time:*\n*Symptoms/Notes:*";
+            window.open(`${CLINIC_INFO.whatsapp}?text=${encodeURIComponent(text)}`, "_blank");
+          }} className="bg-[#25D366] hover:bg-[#1EBE5A] text-white font-semibold flex items-center justify-center gap-2 px-8 py-4 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 active:scale-95 transition-all duration-300 text-base">
+            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+            </svg>
+            WhatsApp Us
+          </button>
+          <button onClick={() => window.dispatchEvent(new CustomEvent('open-chat'))} className="bg-teal-600 hover:bg-teal-500 text-white font-semibold flex items-center justify-center gap-2 px-8 py-4 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 active:scale-95 transition-all duration-300 text-base">
+            <Bot size={20} />
+            Elsan AI Assistant
           </button>
         </div>
 
@@ -115,36 +124,7 @@ function HeroVideoCarousel({ setActiveTab }: { setActiveTab: (tab: string) => vo
         </div>
       </div>
 
-      {/* Apollo-style Quick Access Bar */}
-      <div className="absolute bottom-0 left-0 right-0 z-20">
-        <div className="max-w-6xl mx-auto px-4 pb-6">
-          <div className="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/80 p-3 md:p-4">
-            <div className="grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-3">
-              {[
-                { title: 'Book Appointment', icon: Calendar, tab: 'book', color: 'bg-orange-500 text-white' },
-                { title: 'Find a Doctor', icon: User, tab: 'doctors', color: 'bg-blue-500 text-white' },
-                { title: 'AI Symptom Checker', icon: BrainCircuit, tab: 'aitools', color: 'bg-teal-500 text-white' },
-                { title: 'ProHealth Check', icon: HeartPulse, tab: 'prohealth', color: 'bg-rose-500 text-white' },
-                { title: 'Emergency', icon: Ambulance, tab: 'emergency', color: 'bg-red-600 text-white' },
-                { title: 'International', icon: Globe, tab: 'nri', color: 'bg-indigo-500 text-white' },
-              ].map((item, i) => (
-                <button
-                  key={i}
-                  onClick={() => setActiveTab(item.tab)}
-                  className="flex flex-col items-center justify-center p-3 md:p-4 rounded-xl text-center transition-all duration-300 hover:bg-slate-50 hover:-translate-y-0.5 active:scale-95 group"
-                >
-                  <div className={`mb-2 p-2.5 rounded-xl ${item.color} shadow-sm group-hover:shadow-md transition-shadow`}>
-                    <item.icon size={20} />
-                  </div>
-                  <span className="font-sans font-semibold text-[11px] md:text-xs text-slate-700 leading-tight">{item.title}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 1.5, repeat: Infinity }} className="absolute bottom-28 left-1/2 -translate-x-1/2 z-20 text-white/40">
+      <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 1.5, repeat: Infinity }} className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 text-white/40">
         <ChevronDown size={28} />
       </motion.div>
     </div>
@@ -159,9 +139,20 @@ export default function LandingPage() {
     <AuroraBackground className="min-h-screen min-w-full flex flex-col justify-start items-stretch font-sans text-slate-800" showRadialGradient={true}>
       {/* Apollo-Style Navbar */}
       <nav className="bg-white shadow-md sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto flex items-center justify-between h-[68px] px-4">
-          {/* Left Nav Items */}
-          <div className="hidden lg:flex items-center gap-1">
+        <div className="max-w-7xl mx-auto flex items-center justify-between h-[68px] px-4 relative">
+          {/* Left Logo */}
+          <button onClick={() => setActiveTab('home')} className="flex items-center gap-2.5 z-10">
+            <div className="flex-shrink-0 w-11 h-11 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center p-1">
+              <img src="/logo.png" alt="Elsan Clinic Logo" className="w-full h-full object-contain" />
+            </div>
+            <div className="hidden sm:block text-left">
+              <h1 className="text-xl font-bold text-slate-800 tracking-tight leading-none">Elsan Clinic</h1>
+              <p className="text-[10px] font-bold text-teal-600 uppercase tracking-widest mt-0.5">Trusted Healthcare</p>
+            </div>
+          </button>
+
+          {/* Center Nav Items */}
+          <div className="hidden lg:flex items-center gap-1 absolute left-1/2 -translate-x-1/2 z-10">
             {/* Medical Services Dropdown */}
             <div className="relative group">
               <button onClick={() => setActiveTab('treatments')} className="flex items-center gap-1 px-4 py-2 text-[13px] font-bold text-slate-700 uppercase tracking-wider hover:text-blue-600 transition">
@@ -209,28 +200,18 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* Center Logo */}
-          <button onClick={() => setActiveTab('home')} className="flex items-center gap-2.5 absolute left-1/2 -translate-x-1/2 lg:relative lg:left-auto lg:translate-x-0">
-            <div className="flex-shrink-0 w-11 h-11 bg-white rounded-xl shadow-sm border border-slate-100 flex items-center justify-center p-1">
-              <img src="/logo.png" alt="Elsan Clinic Logo" className="w-full h-full object-contain" />
-            </div>
-            <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-slate-800 tracking-tight leading-none">Elsan Clinic</h1>
-              <p className="text-[10px] font-bold text-teal-600 uppercase tracking-widest mt-0.5">Trusted Healthcare</p>
-            </div>
-          </button>
-
           {/* Right Side */}
-          <div className="flex items-center gap-3">
-            <a href="tel:9444184977" className="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-teal-50 text-teal-600 hover:bg-teal-100 transition" aria-label="Call us">
-              <Phone size={18} />
-            </a>
-            <Link href="/login" className="hidden md:inline text-xs font-bold text-slate-500 hover:text-blue-600 transition uppercase tracking-wider">
-              Staff Login
-            </Link>
+          <div className="flex items-center gap-3 z-10">
             <button onClick={() => setActiveTab('book')} className="bg-orange-500 text-white px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-orange-600 active:scale-95 hover:-translate-y-0.5 transition-all duration-300 shadow-sm hover:shadow-md flex items-center gap-2">
               <Calendar size={16} /> Book Appt
             </button>
+            <a href="tel:9444184977" className="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-teal-50 text-teal-600 hover:bg-teal-100 transition" aria-label="Call us">
+              <Phone size={18} />
+            </a>
+            <div className="hidden md:block w-px h-5 bg-slate-200"></div>
+            <Link href="/login" className="hidden md:inline text-xs font-bold text-slate-500 hover:text-blue-600 transition uppercase tracking-wider">
+              Staff Login
+            </Link>
             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 text-slate-600 hover:text-blue-600 transition" aria-label="Toggle menu">
               {mobileMenuOpen ? <XIcon size={24} /> : <Menu size={24} />}
             </button>
@@ -267,6 +248,33 @@ export default function LandingPage() {
       <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8">
         {activeTab === 'home' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-12">
+
+            {/* Quick Access Bar (Moved below Hero) */}
+            <section className="max-w-6xl mx-auto -mt-4">
+              <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 p-3 md:p-4">
+                <div className="grid grid-cols-3 md:grid-cols-6 gap-2 md:gap-3">
+                  {[
+                    { title: 'Book Appointment', icon: Calendar, tab: 'book', color: 'bg-orange-500 text-white' },
+                    { title: 'Find a Doctor', icon: User, tab: 'doctors', color: 'bg-blue-500 text-white' },
+                    { title: 'AI Symptom Checker', icon: BrainCircuit, tab: 'aitools', color: 'bg-teal-500 text-white' },
+                    { title: 'ProHealth Check', icon: HeartPulse, tab: 'prohealth', color: 'bg-rose-500 text-white' },
+                    { title: 'Emergency', icon: Ambulance, tab: 'emergency', color: 'bg-red-600 text-white' },
+                    { title: 'International', icon: Globe, tab: 'nri', color: 'bg-indigo-500 text-white' },
+                  ].map((item, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setActiveTab(item.tab)}
+                      className="flex flex-col items-center justify-center p-3 md:p-4 rounded-xl text-center transition-all duration-300 hover:bg-slate-50 hover:-translate-y-0.5 active:scale-95 group"
+                    >
+                      <div className={`mb-2 p-2.5 rounded-xl ${item.color} shadow-sm group-hover:shadow-md transition-shadow`}>
+                        <item.icon size={20} />
+                      </div>
+                      <span className="font-sans font-semibold text-[11px] md:text-xs text-slate-700 leading-tight">{item.title}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </section>
 
             <section className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-6xl mx-auto pt-4">
               {[
@@ -393,17 +401,39 @@ export default function LandingPage() {
                   View All Specialties <ChevronRight size={18} />
                 </button>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {SERVICES.map((srv: any, i: number) => {
+              <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {SERVICES.slice(0, 8).map((srv: any, i: number) => {
                   const ICON_MAP: Record<string, any> = { HeartPulse, Users, Activity, Stethoscope, Pill, Baby: Users, Microscope: Activity, Ambulance, ClipboardList: FileText, PersonStanding: User, Syringe: Activity, BedDouble: Activity };
                   const Icon = ICON_MAP[srv.iconName] || Activity;
+                  const COLORS = [
+                    { bg: 'bg-blue-50/60', border: 'border-blue-100', iconBg: 'bg-blue-100', iconText: 'text-blue-600', hoverFrom: 'from-blue-500', hoverTo: 'to-indigo-600', shadow: 'hover:shadow-blue-500/20' },
+                    { bg: 'bg-teal-50/60', border: 'border-teal-100', iconBg: 'bg-teal-100', iconText: 'text-teal-600', hoverFrom: 'from-teal-400', hoverTo: 'to-emerald-500', shadow: 'hover:shadow-teal-500/20' },
+                    { bg: 'bg-orange-50/60', border: 'border-orange-100', iconBg: 'bg-orange-100', iconText: 'text-orange-600', hoverFrom: 'from-orange-400', hoverTo: 'to-rose-500', shadow: 'hover:shadow-orange-500/20' },
+                    { bg: 'bg-purple-50/60', border: 'border-purple-100', iconBg: 'bg-purple-100', iconText: 'text-purple-600', hoverFrom: 'from-purple-500', hoverTo: 'to-fuchsia-600', shadow: 'hover:shadow-purple-500/20' },
+                  ];
+                  const theme = COLORS[i % COLORS.length];
+
                   return (
-                    <button key={i} onClick={() => setActiveTab('treatments')} className="bg-white border border-slate-200 rounded-2xl p-6 text-left hover:border-blue-400 hover:shadow-xl transition group flex flex-col h-full">
-                      <div className="bg-blue-50 text-blue-600 w-14 h-14 flex items-center justify-center rounded-xl mb-4 group-hover:bg-blue-600 group-hover:text-white transition shadow-sm">
-                        <Icon size={28} />
+                    <button 
+                      key={i} 
+                      onClick={() => setActiveTab('treatments')} 
+                      className={`relative overflow-hidden text-left ${theme.bg} border ${theme.border} rounded-3xl p-6 hover:shadow-xl ${theme.shadow} hover:-translate-y-1 transition-all duration-500 group flex flex-col h-full`}
+                    >
+                      {/* Subtle light orb */}
+                      <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/60 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+
+                      <div className="relative z-10 flex flex-col h-full w-full">
+                        <div className={`w-14 h-14 ${theme.iconBg} ${theme.iconText} rounded-2xl flex items-center justify-center mb-5 shadow-sm group-hover:scale-110 group-hover:bg-gradient-to-br group-hover:${theme.hoverFrom} group-hover:${theme.hoverTo} group-hover:text-white transition-all duration-500`}>
+                          <Icon size={26} className="transition-transform duration-500 group-hover:-rotate-6" />
+                        </div>
+                        
+                        <h3 className="font-bold text-slate-800 text-[17px] mb-2 group-hover:text-slate-900 transition-colors duration-300 line-clamp-1">{srv.title}</h3>
+                        <p className="text-sm text-slate-600 leading-relaxed font-medium line-clamp-2 flex-1">{srv.description}</p>
+                        
+                        <div className={`mt-5 flex items-center ${theme.iconText} text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 ease-out`}>
+                          Explore <ArrowRight size={14} className="ml-1.5 group-hover:translate-x-1 transition-transform duration-300" />
+                        </div>
                       </div>
-                      <h3 className="font-bold text-slate-800 text-lg mb-2">{srv.title}</h3>
-                      <p className="text-slate-500 text-sm leading-relaxed line-clamp-3">{srv.description}</p>
                     </button>
                   );
                 })}
@@ -422,29 +452,52 @@ export default function LandingPage() {
                     { name: "Dr. N. Elangeswaran", spec: "Senior Consultant - Internal Medicine", exp: "20+ Years", img: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80", tags: ['Diabetes', 'Cardiology', 'Geriatrics'] },
                     { name: "Dr. E. Pandiya Meena", spec: "Consultant - Internal Medicine (Online)", exp: "15+ Years", img: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80", tags: ['Cardiac Care', 'Telemedicine', 'Endocrinology'] },
                     { name: "Dr. R. Sambath Kumar", spec: "Chief Consultant Paediatrician", exp: "18+ Years", img: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&q=80", tags: ['Paediatrics', 'Vaccinations', 'Nutrition'] }
-                  ].map((doc, i) => (
-                    <div key={i} className="bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition border border-slate-200 flex flex-col">
-                      <div className="relative">
-                        <img src={doc.img} alt={doc.name} className="w-full h-64 object-cover object-top" />
-                        <div className="absolute top-3 right-3 bg-green-500 text-white text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center gap-1 shadow-md">
-                          <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span> Available
+                  ].map((doc, i) => {
+                    const COLORS = [
+                      { bg: 'bg-blue-50/60', border: 'border-blue-100', iconBg: 'bg-blue-100', iconText: 'text-blue-600', shadow: 'hover:shadow-blue-500/20' },
+                      { bg: 'bg-teal-50/60', border: 'border-teal-100', iconBg: 'bg-teal-100', iconText: 'text-teal-600', shadow: 'hover:shadow-teal-500/20' },
+                      { bg: 'bg-orange-50/60', border: 'border-orange-100', iconBg: 'bg-orange-100', iconText: 'text-orange-600', shadow: 'hover:shadow-orange-500/20' },
+                    ];
+                    const theme = COLORS[i % COLORS.length];
+
+                    return (
+                      <div key={i} className={`relative bg-white rounded-[28px] overflow-hidden shadow-sm hover:shadow-xl ${theme.shadow} transition-all duration-500 border border-slate-100 flex flex-col group hover:-translate-y-2`}>
+                        {/* Top Colored Section */}
+                        <div className={`relative pt-8 pb-6 px-6 ${theme.bg} flex flex-col items-center text-center overflow-hidden border-b ${theme.border}`}>
+                          {/* Subtle light orb matching the wedges */}
+                          <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/60 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                          
+                          {/* Circular Avatar */}
+                          <div className="relative w-28 h-28 mb-5 z-10">
+                            <img src={doc.img} alt={doc.name} className="w-full h-full object-cover object-top rounded-full border-4 border-white shadow-md group-hover:scale-110 transition-transform duration-500" />
+                            <div className="absolute bottom-1 right-1 bg-green-500 text-white text-[10px] font-bold p-1.5 rounded-full flex items-center shadow-md border-2 border-white">
+                              <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                            </div>
+                          </div>
+                          
+                          <div className="relative z-10">
+                            <h3 className="text-xl font-bold text-slate-800 mb-1 group-hover:text-slate-900 transition-colors">{doc.name}</h3>
+                            <p className={`${theme.iconText} font-semibold text-sm`}>{doc.spec}</p>
+                          </div>
+                        </div>
+
+                        {/* Bottom Information Section */}
+                        <div className="p-6 flex flex-col flex-1 bg-white relative z-20">
+                          <div className="flex flex-wrap justify-center gap-2 mb-6">
+                            {doc.tags.map((tag, ti) => (
+                              <span key={ti} className="bg-slate-50 border border-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">{tag}</span>
+                            ))}
+                          </div>
+                          <div className="flex justify-between items-center text-slate-500 text-sm border-t border-slate-100 pt-5 mt-auto">
+                            <span className={`flex items-center gap-1.5 font-medium ${theme.iconBg} ${theme.iconText} px-3 py-1.5 rounded-lg`}><Clock size={16} /> {doc.exp}</span>
+                            <button onClick={() => setActiveTab('book')} className={`text-slate-600 font-bold hover:${theme.iconText} transition flex items-center gap-1 text-sm group/btn`}>
+                              Book Now <ArrowRight size={16} className={`group-hover/btn:translate-x-1 transition-transform ${theme.iconText}`} />
+                            </button>
+                          </div>
                         </div>
                       </div>
-                      <div className="p-6 flex flex-col flex-1">
-                        <h3 className="text-xl font-bold text-slate-800 mb-1">{doc.name}</h3>
-                        <p className="text-blue-600 font-medium text-sm mb-3">{doc.spec}</p>
-                        <div className="flex flex-wrap gap-1.5 mb-4">
-                          {doc.tags.map((tag, ti) => (
-                            <span key={ti} className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[11px] font-medium">{tag}</span>
-                          ))}
-                        </div>
-                        <div className="flex justify-between items-center text-slate-500 text-sm border-t pt-4 mt-auto">
-                          <span className="flex items-center gap-1"><Clock size={16} /> {doc.exp}</span>
-                          <button onClick={() => setActiveTab('book')} className="text-orange-500 font-bold hover:text-orange-700 transition">Book Appt</button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
                 <div className="text-center mt-10">
                   <button onClick={() => setActiveTab('doctors')} className="border-2 border-blue-600 text-blue-600 font-bold py-3 px-8 rounded-xl hover:bg-blue-600 hover:text-white transition">
@@ -459,11 +512,11 @@ export default function LandingPage() {
               <div className="grid md:grid-cols-2 gap-12 items-center">
                 <div>
                   <h2 className="text-3xl md:text-4xl font-bold text-blue-900 mb-6">Advanced Medical Technology</h2>
-                  <p className="text-slate-600 text-lg mb-8 leading-relaxed">Elsan Clinic is equipped with the latest diagnostic and therapeutic technologies. From AI-assisted robotic surgeries to 3D imaging, we ensure precision and safety at every step of your treatment.</p>
+                  <p className="text-slate-600 text-lg mb-8 leading-relaxed">Elsan Clinic is equipped with the latest diagnostic and therapeutic technologies. From high-resolution 3D imaging to minimally invasive surgical suites, we ensure precision, comfort, and safety at every step of your treatment.</p>
                   <ul className="space-y-4">
                     {[
-                      "AI-Powered Diagnostic Imaging (Gemini 3.1)",
-                      "Robotic Surgery Integration",
+                      "High-Resolution 3D MRI & CT Scanning",
+                      "Minimally Invasive Endoscopic Suite",
                       "24/7 Advanced Cath Lab",
                       "Fully Automated Pathology Lab"
                     ].map((item, i) => (
@@ -475,7 +528,7 @@ export default function LandingPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400&q=80" alt="Hospital Room" className="rounded-2xl shadow-md w-full h-48 md:h-64 object-cover" />
-                  <img src="https://images.unsplash.com/photo-1516549655169-df83a0774514?w=400&q=80" alt="Robotic Surgery" className="rounded-2xl shadow-md w-full h-48 md:h-64 object-cover mt-8" />
+                  <img src="https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?w=400&q=80" alt="Advanced Imaging Tech" className="rounded-2xl shadow-md w-full h-48 md:h-64 object-cover mt-8" />
                 </div>
               </div>
             </section>
