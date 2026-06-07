@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, UserRound, Calendar, FileText, Video, LayoutDashboard, Settings, LogOut, Loader2, BedDouble } from "lucide-react";
+import { Users, UserRound, Calendar, FileText, Video, LayoutDashboard, Settings, LogOut, Loader2, BedDouble, Pill, MessageCircle, BarChart3, ShieldAlert, Lock } from "lucide-react";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from "../../lib/utils";
@@ -29,7 +29,12 @@ const getMenuItems = (role: string) => {
   }
 
   if (['SUPER_ADMIN'].includes(role)) {
+    items.push({ name: "Medicines", href: "/admin/medicines", icon: Pill });
+    items.push({ name: "WhatsApp", href: "/admin/whatsapp", icon: MessageCircle });
+    items.push({ name: "Reports", href: "/admin/reports", icon: BarChart3 });
     items.push({ name: "Settings", href: "/admin/settings", icon: Settings });
+    items.push({ name: "Audit Logs", href: "/admin/audit-logs", icon: ShieldAlert });
+    items.push({ name: "Permissions", href: "/admin/permissions", icon: Lock });
   }
 
   return items.filter((v, i, a) => a.findIndex(t => (t.name === v.name)) === i);
