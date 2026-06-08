@@ -34,19 +34,19 @@ function HeroVideoCarousel({ onNavigate }: { onNavigate: (v: ViewState) => void 
   const [currentSlide, setCurrentSlide] = React.useState(0);
   const slides = [
     {
-      videoUrl: "/video3.mp4",
+      videoUrl: "/video3.mp4?v=3",
       posterUrl: "https://images.unsplash.com/photo-1538108149393-cebb47cbdc12?w=2000&q=80",
       title: "Advanced Medical Technology",
       subtitle: "Equipped with state-of-the-art facilities for precise diagnostics and treatment."
     },
     {
-      videoUrl: "/video2.mp4",
+      videoUrl: "/video2.mp4?v=3",
       posterUrl: "https://images.unsplash.com/photo-1551076805-e1869043e560?w=2000&q=80",
       title: "Compassionate Healthcare",
       subtitle: "Our dedicated team provides personalized care for your faster recovery."
     },
     {
-      videoUrl: "/video1.mp4",
+      videoUrl: "/video1.mp4?v=3",
       posterUrl: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=2000&q=80",
       title: "Expert Care for Every Family",
       subtitle: "Serving over 10,000 families in Chennai for more than 20 years. Intelligently delivered by ELSAN AI."
@@ -88,7 +88,7 @@ function HeroVideoCarousel({ onNavigate }: { onNavigate: (v: ViewState) => void 
                playsInline 
                className="absolute inset-0 w-full h-full object-cover object-center" 
              />
-             <div className="absolute inset-0 bg-black/40" /> {/* Dark Overlay for text readability */}
+             <div className="absolute inset-0 bg-black/40 pointer-events-none" /> {/* Dark Overlay for text readability */}
           </div>
        ))}
        
@@ -215,16 +215,38 @@ function HomeView({ onNavigate }: { onNavigate: (v: ViewState) => void }) {
           </button>
         </div>
         
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-4 md:px-0">
+        <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6 px-4 md:px-0">
           {SERVICES.slice(0, 8).map((srv, i) => {
             const Icon = ICON_MAP[srv.iconName] || Activity;
+            const COLORS = [
+              { bg: 'bg-blue-50/60', border: 'border-blue-100', iconBg: 'bg-blue-100', iconText: 'text-blue-600', hoverFrom: 'from-blue-500', hoverTo: 'to-indigo-600', shadow: 'hover:shadow-blue-500/20' },
+              { bg: 'bg-teal-50/60', border: 'border-teal-100', iconBg: 'bg-teal-100', iconText: 'text-teal-600', hoverFrom: 'from-teal-400', hoverTo: 'to-emerald-500', shadow: 'hover:shadow-teal-500/20' },
+              { bg: 'bg-orange-50/60', border: 'border-orange-100', iconBg: 'bg-orange-100', iconText: 'text-orange-600', hoverFrom: 'from-orange-400', hoverTo: 'to-rose-500', shadow: 'hover:shadow-orange-500/20' },
+              { bg: 'bg-purple-50/60', border: 'border-purple-100', iconBg: 'bg-purple-100', iconText: 'text-purple-600', hoverFrom: 'from-purple-500', hoverTo: 'to-fuchsia-600', shadow: 'hover:shadow-purple-500/20' },
+            ];
+            const theme = COLORS[i % COLORS.length];
+
             return (
-              <button key={i} onClick={() => onNavigate('services')} className="bg-white border border-slate-200 rounded-xl p-5 text-left hover:border-blue-400 hover:shadow-lg transition group">
-                <div className="w-12 h-12 bg-slate-50 text-blue-800 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition">
-                  <Icon size={24} />
+              <button 
+                key={i} 
+                onClick={() => onNavigate('services')} 
+                className={`relative overflow-hidden text-left ${theme.bg} border ${theme.border} rounded-3xl p-6 hover:shadow-xl ${theme.shadow} hover:-translate-y-1 transition-all duration-500 group flex flex-col`}
+              >
+                {/* Subtle light orb */}
+                <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/60 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+
+                <div className="relative z-10 flex flex-col h-full w-full">
+                  <div className={`w-14 h-14 ${theme.iconBg} ${theme.iconText} rounded-2xl flex items-center justify-center mb-5 shadow-sm group-hover:scale-110 group-hover:bg-gradient-to-br group-hover:${theme.hoverFrom} group-hover:${theme.hoverTo} group-hover:text-white transition-all duration-500`}>
+                    <Icon size={26} className="transition-transform duration-500 group-hover:-rotate-6" />
+                  </div>
+                  
+                  <h3 className="font-bold text-slate-800 text-[17px] mb-2 group-hover:text-slate-900 transition-colors duration-300 line-clamp-1">{srv.title}</h3>
+                  <p className="text-sm text-slate-600 leading-relaxed font-medium line-clamp-2 flex-1">{srv.description}</p>
+                  
+                  <div className={`mt-5 flex items-center ${theme.iconText} text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 ease-out`}>
+                    Explore <ArrowRight size={14} className="ml-1.5 group-hover:translate-x-1 transition-transform duration-300" />
+                  </div>
                 </div>
-                <h3 className="font-bold text-slate-800 mb-1 line-clamp-1">{srv.title}</h3>
-                <p className="text-xs text-slate-500 line-clamp-2">{srv.description}</p>
               </button>
             );
           })}
@@ -352,49 +374,94 @@ export function DoctorsView() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {doctors.map((doc, i) => (
-          <div key={i} className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition flex flex-col">
-            <div className="bg-blue-50 border-b border-slate-200 p-6">
-              <div className="flex justify-between items-start">
+        {doctors.map((doc, i) => {
+          const defaultImages = [
+            "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80",
+            "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80",
+            "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&q=80",
+            "https://images.unsplash.com/photo-1594824436998-d8bdca9f77f0?w=400&q=80"
+          ];
+          const img = defaultImages[i % defaultImages.length];
+
+          const COLORS = [
+            { bg: 'bg-blue-50/60', border: 'border-blue-100', iconBg: 'bg-blue-100', iconText: 'text-blue-600', shadow: 'hover:shadow-blue-500/20' },
+            { bg: 'bg-teal-50/60', border: 'border-teal-100', iconBg: 'bg-teal-100', iconText: 'text-teal-600', shadow: 'hover:shadow-teal-500/20' },
+            { bg: 'bg-orange-50/60', border: 'border-orange-100', iconBg: 'bg-orange-100', iconText: 'text-orange-600', shadow: 'hover:shadow-orange-500/20' },
+            { bg: 'bg-purple-50/60', border: 'border-purple-100', iconBg: 'bg-purple-100', iconText: 'text-purple-600', shadow: 'hover:shadow-purple-500/20' },
+          ];
+          const theme = COLORS[i % COLORS.length];
+
+          return (
+            <div key={i} className={`relative bg-white rounded-[28px] overflow-hidden shadow-sm hover:shadow-xl ${theme.shadow} transition-all duration-500 border border-slate-100 flex flex-col group hover:-translate-y-2`}>
+              {/* Top Colored Section */}
+              <div className={`relative pt-8 pb-6 px-6 ${theme.bg} flex flex-col items-center text-center overflow-hidden border-b ${theme.border}`}>
+                <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/60 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+                
+                {/* Consultation Type Badges Overlay */}
+                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                  <span className={`inline-flex items-center gap-1.5 bg-white/60 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-bold ${theme.iconText} border border-white shadow-sm`}>
+                    {doc.consultationType.includes('Online') ? <Activity size={12} /> : <Building2 size={12} />}
+                    {doc.consultationType}
+                  </span>
+                </div>
+
+                {/* Circular Avatar */}
+                <div className="relative w-28 h-28 mb-5 z-10 mt-4">
+                  <img src={img} alt={doc.name} className="w-full h-full object-cover object-top rounded-full border-4 border-white shadow-md group-hover:scale-110 transition-transform duration-500" />
+                  <div className="absolute bottom-1 right-1 bg-green-500 text-white text-[10px] font-bold p-1.5 rounded-full flex items-center shadow-md border-2 border-white">
+                    <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                  </div>
+                </div>
+                
+                <div className="relative z-10">
+                  <h3 className="text-xl md:text-2xl font-bold text-slate-800 mb-1 group-hover:text-slate-900 transition-colors">{doc.name}</h3>
+                  <p className={`${theme.iconText} font-semibold text-sm`}>{doc.role}</p>
+                </div>
+              </div>
+
+              {/* Bottom Information Section */}
+              <div className="p-6 flex flex-col flex-1 bg-white relative z-20 space-y-5">
                 <div>
-                  <h2 className="text-xl font-bold text-blue-900 mb-1">{doc.name}</h2>
-                  <p className="text-sm font-medium text-teal-700">{doc.role}</p>
+                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2.5">Qualifications</h3>
+                  <ul className="space-y-1.5 text-sm text-slate-700 font-medium">
+                    {doc.qualifications.map((q: string, idx: number) => (
+                      <li key={`q-${idx}`} className="flex items-start gap-2">
+                        <div className={`w-1.5 h-1.5 rounded-full ${theme.iconBg} mt-1.5 shrink-0`} />
+                        {q}
+                      </li>
+                    ))}
+                    {doc.fellowships.map((f: string, idx: number) => (
+                      <li key={`f-${idx}`} className="flex items-start gap-2 text-slate-500">
+                        <div className={`w-1.5 h-1.5 rounded-full bg-slate-300 mt-1.5 shrink-0`} />
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div className="pt-4 border-t border-slate-100 flex-1">
+                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2.5">Specialises In</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {doc.specialties.map((spec: string, idx: number) => (
+                      <span key={idx} className="bg-slate-50 border border-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
+                        {spec}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center text-slate-500 text-sm border-t border-slate-100 pt-5 mt-auto">
+                  <span className="flex items-center gap-1.5 font-bold bg-slate-50 text-slate-600 px-3 py-1.5 rounded-lg border border-slate-100">
+                    <Phone size={14} /> {doc.phone}
+                  </span>
+                  <button onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'book' }))} className={`text-slate-600 font-bold hover:${theme.iconText} transition flex items-center gap-1 text-sm group/btn`}>
+                    Book Now <ArrowRight size={16} className={`group-hover/btn:translate-x-1 transition-transform ${theme.iconText}`} />
+                  </button>
                 </div>
               </div>
-              <div className="mt-4 flex flex-wrap gap-2">
-                <span className="inline-flex items-center gap-1 bg-white px-3 py-1 rounded-full text-xs font-semibold text-slate-700 border border-slate-200 shadow-sm">
-                  {doc.consultationType.includes('Online') ? <Activity size={12} className="text-blue-500" /> : <Building2 size={12} className="text-blue-500" />}
-                  {doc.consultationType}
-                </span>
-                <span className="inline-flex items-center gap-1 bg-white px-3 py-1 rounded-full text-xs font-semibold text-slate-700 border border-slate-200 shadow-sm">
-                  <Phone size={12} className="text-green-500" />
-                  {doc.phone}
-                </span>
-              </div>
             </div>
-            
-            <div className="p-6 space-y-5 flex-1 flex flex-col">
-              <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Qualifications & Fellowships</h3>
-                <ul className="space-y-1.5 list-disc list-inside text-sm text-slate-700">
-                  {doc.qualifications.map((q: string, idx: number) => <li key={`q-${idx}`}>{q}</li>)}
-                  {doc.fellowships.map((f: string, idx: number) => <li key={`f-${idx}`} className="text-slate-600">{f}</li>)}
-                </ul>
-              </div>
-              
-              <div className="mt-auto pt-4 border-t border-slate-100">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Specialises In</h3>
-                <div className="flex flex-wrap gap-1.5">
-                  {doc.specialties.map((spec: string, idx: number) => (
-                    <span key={idx} className="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs">
-                      {spec}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </motion.div>
   );
@@ -428,16 +495,38 @@ export function ServicesView({ onNavigate }: { onNavigate?: (v: ViewState) => vo
         <p className="text-lg text-slate-600">Comprehensive care under one roof — click any service to view details.</p>
       </div>
 
-      <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {SERVICES.map((srv, i) => {
           const Icon = ICON_MAP[srv.iconName] || Activity;
+          const COLORS = [
+            { bg: 'bg-blue-50/60', border: 'border-blue-100', iconBg: 'bg-blue-100', iconText: 'text-blue-600', hoverFrom: 'from-blue-500', hoverTo: 'to-indigo-600', shadow: 'hover:shadow-blue-500/20' },
+            { bg: 'bg-teal-50/60', border: 'border-teal-100', iconBg: 'bg-teal-100', iconText: 'text-teal-600', hoverFrom: 'from-teal-400', hoverTo: 'to-emerald-500', shadow: 'hover:shadow-teal-500/20' },
+            { bg: 'bg-orange-50/60', border: 'border-orange-100', iconBg: 'bg-orange-100', iconText: 'text-orange-600', hoverFrom: 'from-orange-400', hoverTo: 'to-rose-500', shadow: 'hover:shadow-orange-500/20' },
+            { bg: 'bg-purple-50/60', border: 'border-purple-100', iconBg: 'bg-purple-100', iconText: 'text-purple-600', hoverFrom: 'from-purple-500', hoverTo: 'to-fuchsia-600', shadow: 'hover:shadow-purple-500/20' },
+          ];
+          const theme = COLORS[i % COLORS.length];
+
           return (
-            <div key={i} onClick={() => setSelectedService(srv)} className="cursor-pointer bg-white border border-slate-200 rounded-xl p-5 hover:border-blue-500 hover:shadow-xl hover:-translate-y-1 transition duration-300 group">
-              <div className="w-10 h-10 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition">
-                <Icon size={20} />
+            <div 
+              key={i} 
+              onClick={() => setSelectedService(srv)} 
+              className={`relative overflow-hidden cursor-pointer ${theme.bg} border ${theme.border} rounded-3xl p-6 hover:shadow-xl ${theme.shadow} hover:-translate-y-1 transition-all duration-500 group flex flex-col`}
+            >
+              {/* Subtle light orb */}
+              <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/60 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
+
+              <div className="relative z-10 flex flex-col h-full w-full">
+                <div className={`w-14 h-14 ${theme.iconBg} ${theme.iconText} rounded-2xl flex items-center justify-center mb-5 shadow-sm group-hover:scale-110 group-hover:bg-gradient-to-br group-hover:${theme.hoverFrom} group-hover:${theme.hoverTo} group-hover:text-white transition-all duration-500`}>
+                  <Icon size={26} className="transition-transform duration-500 group-hover:-rotate-6" />
+                </div>
+                
+                <h3 className="font-bold text-slate-800 text-[17px] mb-2 group-hover:text-slate-900 transition-colors duration-300">{srv.title}</h3>
+                <p className="text-sm text-slate-600 leading-relaxed font-medium flex-1">{srv.description}</p>
+                
+                <div className={`mt-5 flex items-center ${theme.iconText} text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 ease-out`}>
+                  View Details <ArrowRight size={14} className="ml-1.5 group-hover:translate-x-1 transition-transform duration-300" />
+                </div>
               </div>
-              <h3 className="font-bold text-slate-800 mb-2">{srv.title}</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">{srv.description}</p>
             </div>
           );
         })}

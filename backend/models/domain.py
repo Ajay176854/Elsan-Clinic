@@ -45,6 +45,8 @@ class Doctor(Base):
     consultation_fee = Column(Integer, nullable=False)
     signature_url = Column(String(500), nullable=True)
     signature_public_id = Column(String(255), nullable=True)
+    profile_pic_url = Column(String(500), nullable=True)
+    profile_pic_public_id = Column(String(255), nullable=True)
     consultation_timings = Column(String(255), nullable=True)
     status = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), default=get_utc_now)

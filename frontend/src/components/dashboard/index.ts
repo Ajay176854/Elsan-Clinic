@@ -12,3 +12,5 @@ export { default as AppointmentCard } from './AppointmentCard';
 export { default as PrescriptionForm } from './PrescriptionForm';
 export { default as SettingsPanel } from './SettingsPanel';
 export { DischargeConfirmModal } from './DischargeConfirmModal';
+export { DoctorFormModal } from './DoctorFormModal';
+

@@ -33,8 +33,75 @@ export function useUpdateDoctor() {
   return useMutation({
     mutationFn: ({ id, data }: { id: string; data: Record<string, unknown> }) =>
       doctorService.update(id, data),
-    onSuccess: () => {
+    onSuccess: (_, { id }) => {
       queryClient.invalidateQueries({ queryKey: ['doctors'] });
+      queryClient.invalidateQueries({ queryKey: ['doctors', id] });
     },
   });
 }
+
+export function useUploadSignature() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, file }: { id: string; file: File }) =>
+      doctorService.uploadSignature(id, file),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['doctors'] });
+      queryClient.invalidateQueries({ queryKey: ['doctors', id] });
+    },
+  });
+}
+
+export function useDeleteSignature() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => doctorService.deleteSignature(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['doctors'] });
+      queryClient.invalidateQueries({ queryKey: ['doctors', id] });
+    },
+  });
+}
+
+export function useDoctorStats(id: string | null) {
+  return useQuery({
+    queryKey: ['doctors', id, 'stats'],
+    queryFn: () => doctorService.getStats(id!),
+    enabled: !!id,
+  });
+}
+
+export function useResetDoctorPassword() {
+  return useMutation({
+    mutationFn: ({ id, admin_password, new_password }: { id: string; admin_password: string; new_password: string }) =>
+      doctorService.resetPassword(id, admin_password, new_password),
+  });
+}
+
+export function useUploadProfilePic() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, file }: { id: string; file: File }) => doctorService.uploadProfilePic(id, file),
+    onSuccess: (_, { id }) => {
+      queryClient.invalidateQueries({ queryKey: ['doctors'] });
+      queryClient.invalidateQueries({ queryKey: ['doctors', id] });
+    },
+  });
+}
+
+export function useDeleteProfilePic() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: string) => doctorService.deleteProfilePic(id),
+    onSuccess: (_, id) => {
+      queryClient.invalidateQueries({ queryKey: ['doctors'] });
+      queryClient.invalidateQueries({ queryKey: ['doctors', id] });
+    },
+  });
+}
+
+

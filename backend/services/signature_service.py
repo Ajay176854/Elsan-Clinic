@@ -2,6 +2,7 @@ import uuid
 from fastapi import UploadFile, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 from models.domain import Doctor
 from services.cloudinary_service import upload_file, delete_file
 from services.audit_service import AuditService
@@ -13,7 +14,7 @@ class SignatureService:
 
     async def upload_signature(self, doctor_id: uuid.UUID, file: UploadFile, user_id: uuid.UUID) -> Doctor:
         # Validate doctor exists
-        result = await self.db.execute(select(Doctor).where(Doctor.id == doctor_id))
+        result = await self.db.execute(select(Doctor).options(selectinload(Doctor.user)).where(Doctor.id == doctor_id))
         doctor = result.scalar_one_or_none()
         if not doctor:
             raise HTTPException(status_code=404, detail="Doctor not found")

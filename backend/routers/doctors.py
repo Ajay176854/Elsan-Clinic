@@ -6,10 +6,11 @@ from database.database import get_db
 from dependencies.auth import get_current_user
 from middleware.rbac import require_roles
 from models.domain import User, Doctor
-from schemas.doctors import DoctorCreate, DoctorUpdate, DoctorResponse
+from schemas.doctors import DoctorCreate, DoctorUpdate, DoctorResponse, DoctorStatsResponse, PasswordResetRequest
 from repositories.doctors import DoctorRepository
 from services.doctors import DoctorService
 from services.signature_service import SignatureService
+from services.profile_pic_service import ProfilePicService
 
 router = APIRouter(prefix="/api/v1/doctors", tags=["Doctor Management"])
 
@@ -30,6 +31,7 @@ def map_response(doctor: Doctor) -> DoctorResponse:
         consultation_fee=doctor.consultation_fee,
         consultation_timings=doctor.consultation_timings,
         signature_url=doctor.signature_url,
+        profile_pic_url=doctor.profile_pic_url,
         is_active=user.is_active,
         status=doctor.status,
         created_at=doctor.created_at,
@@ -136,3 +138,49 @@ async def delete_signature(
     if not success:
         raise HTTPException(status_code=404, detail="Signature not found")
     return {"status": "success", "message": "Signature deleted"}
+
+@router.get("/{id}/stats", response_model=DoctorStatsResponse)
+@require_roles(["SUPER_ADMIN", "DIRECTOR", "RECEPTIONIST", "DOCTOR", "NURSE"])
+async def get_doctor_stats(
+    id: str,
+    current_user: User = Depends(get_current_user),
+    service: DoctorService = Depends(get_doctor_service)
+):
+    return await service.get_doctor_stats(id)
+
+@router.patch("/{id}/reset-password", status_code=status.HTTP_200_OK)
+@require_roles(["SUPER_ADMIN", "DIRECTOR"])
+async def reset_doctor_password(
+    id: str,
+    data: PasswordResetRequest,
+    current_user: User = Depends(get_current_user),
+    service: DoctorService = Depends(get_doctor_service)
+):
+    await service.reset_password(id, current_user, data.admin_password, data.new_password)
+    return {"status": "success", "message": "Password reset successfully"}
+
+@router.post("/{doctor_id}/profile-picture", response_model=DoctorResponse)
+@require_roles(["SUPER_ADMIN", "DIRECTOR", "DOCTOR"])
+async def upload_profile_picture(
+    doctor_id: uuid.UUID,
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    service = ProfilePicService(db)
+    doctor = await service.upload_profile_picture(doctor_id, file, current_user.id)
+    return map_response(doctor)
+
+@router.delete("/{doctor_id}/profile-picture")
+@require_roles(["SUPER_ADMIN", "DIRECTOR", "DOCTOR"])
+async def delete_profile_picture(
+    doctor_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    service = ProfilePicService(db)
+    success = await service.delete_profile_picture(doctor_id, current_user.id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Profile picture not found")
+    return {"status": "success", "message": "Profile picture deleted"}
+

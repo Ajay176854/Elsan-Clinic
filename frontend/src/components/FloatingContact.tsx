@@ -1,6 +1,6 @@
 "use client";
 
-import { MessageSquare, Send, X, Calendar, User, Info } from "lucide-react";
+import { MessageSquare, Send, X, Calendar, User, Info, Bot } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef, useEffect } from "react";
 import { DOCTORS, CLINIC_INFO } from "../data";
@@ -14,12 +14,51 @@ type Message = {
 
 type ChatState = 'idle' | 'booking_name' | 'booking_phone' | 'booking_age' | 'booking_gender' | 'booking_doctor' | 'booking_date' | 'booking_time' | 'booking_notes';
 
-const INITIAL_MESSAGE: Message = {
+const TRANSLATIONS = {
+  en: {
+    init: `Hello! Welcome to Elsan Clinic.\n\n📍 Location: 56/1 & 56/2, Perumal Koil Street, Saidapet (West), Chennai - 15\n📞 Phone: +91 9444184977\n\nHow can I assist you today?`,
+    optBook: 'Book Appointment', optWhatsApp: 'WhatsApp Us', optMenu: 'Main Menu',
+    cancel: 'Booking cancelled. How else can I help you?',
+    askPhone: 'Thank you, {name}. What is your phone number?',
+    askAge: 'Got it. What is your age?', invalidAge: 'Please enter a valid number for your age.',
+    askGender: 'Thanks. Please select your gender.', optMale: 'Male', optFemale: 'Female', optOther: 'Other',
+    askDoc: 'Which doctor would you like to consult?', optAnyDoc: 'Any Available Doctor',
+    askDate: 'When would you like to visit? Select an option or type a date (YYYY-MM-DD).',
+    askTime: 'Great. What time would you prefer?',
+    askNotes: 'Almost done. Please describe any symptoms or reason for visit (or type "None").',
+    success: '✅ Appointment Confirmed!\n\nYour appointment with {doc} is scheduled for {date} at {time}. Our team will contact you at {phone}.\n\nThank you for choosing Elsan Clinic!',
+    err: 'Sorry, there was an error processing your appointment.',
+    netErr: 'Sorry, we couldn\'t connect to our servers.',
+    redirectWa: 'I am redirecting you to our official WhatsApp support...',
+    startBook: 'I can help you book an appointment right here! To start, may I know your full name?',
+    fallback: 'I\'m a virtual assistant. I can help you book an appointment, find a doctor, or give you clinic info. How can I help?'
+  },
+  ta: {
+    init: `வணக்கம்! எல்சன் கிளினிக்கிற்கு உங்களை வரவேற்கிறோம்.\n\n📍 முகவரி: 56/1 & 56/2, பெருமாள் கோவில் தெரு, சைதாப்பேட்டை (மேற்கு), சென்னை - 15\n📞 தொலைபேசி: +91 9444184977\n\nநான் உங்களுக்கு எவ்வாறு உதவ முடியும்?`,
+    optBook: 'முன்பதிவு செய்', optWhatsApp: 'வாட்ஸ்அப்', optMenu: 'முக்கிய மெனு',
+    cancel: 'முன்பதிவு ரத்து செய்யப்பட்டது. வேறு என்ன உதவி தேவை?',
+    askPhone: 'நன்றி, {name}. உங்கள் தொலைபேசி எண் என்ன?',
+    askAge: 'புரிந்தது. உங்கள் வயது என்ன?', invalidAge: 'தயவுசெய்து சரியான வயதை உள்ளிடவும்.',
+    askGender: 'நன்றி. உங்கள் பாலினத்தை தேர்ந்தெடுக்கவும்.', optMale: 'ஆண்', optFemale: 'பெண்', optOther: 'மற்றவை',
+    askDoc: 'நீங்கள் எந்த மருத்துவரை பார்க்க விரும்புகிறீர்கள்?', optAnyDoc: 'எந்த மருத்துவரும்',
+    askDate: 'நீங்கள் எப்போது வர விரும்புகிறீர்கள்? ஒரு தேதியை தேர்ந்தெடுக்கவும் (YYYY-MM-DD).',
+    askTime: 'சிறப்பு. உங்களுக்கு எந்த நேரம் வசதியாக இருக்கும்?',
+    askNotes: 'கிட்டத்தட்ட முடிந்தது. உங்கள் அறிகுறிகளை விவரிக்கவும் (அல்லது "இல்லை" என தட்டச்சு செய்யவும்).',
+    success: '✅ முன்பதிவு உறுதி செய்யப்பட்டது!\n\nஉங்கள் முன்பதிவு {doc} உடன் {date} அன்று {time} மணிக்கு திட்டமிடப்பட்டுள்ளது. எங்கள் குழு உங்களை {phone} என்ற எண்ணில் தொடர்பு கொள்ளும்.\n\nஎல்சன் கிளினிக்கை தேர்ந்தெடுத்ததற்கு நன்றி!',
+    err: 'மன்னிக்கவும், உங்கள் முன்பதிவைச் செயலாக்குவதில் பிழை ஏற்பட்டது.',
+    netErr: 'மன்னிக்கவும், எங்கள் சர்வருடன் இணைக்க முடியவில்லை.',
+    redirectWa: 'வாட்ஸ்அப் ஆதரவிற்கு உங்களை திருப்பி விடுகிறேன்...',
+    startBook: 'உங்கள் முன்பதிவை நான் இங்கேயே செய்ய முடியும்! தொடங்க, உங்கள் முழு பெயரைக் கூற முடியுமா?',
+    fallback: 'நான் ஒரு மெய்நிகர் உதவியாளர். முன்பதிவு செய்ய அல்லது தகவல்களைப் பெற நான் உங்களுக்கு உதவ முடியும்.'
+  }
+};
+
+const getInitialMessage = (lang: 'en' | 'ta'): Message => ({
   id: 'init',
   role: 'bot',
-  text: `Hello! Welcome to Elsan Clinic.\n\n📍 Location: 56/1 & 56/2, Perumal Koil Street, Saidapet (West), Chennai - 15\n📞 Phone: +91 9444184977\n\nHow can I assist you today?`,
-  options: ['Book Appointment', 'WhatsApp Us']
-};
+  text: TRANSLATIONS[lang].init,
+  options: [TRANSLATIONS[lang].optBook, TRANSLATIONS[lang].optWhatsApp]
+});
 
 const getNextDateStr = (daysOffset: number) => {
   const d = new Date();
@@ -29,9 +68,16 @@ const getNextDateStr = (daysOffset: number) => {
 
 export default function FloatingContact() {
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
+  const [language, setLanguage] = useState<'en' | 'ta'>('en');
+  const [messages, setMessages] = useState<Message[]>([getInitialMessage('en')]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
+
+  useEffect(() => {
+    if (messages.length === 1 && messages[0].id === 'init') {
+      setMessages([getInitialMessage(language)]);
+    }
+  }, [language]);
   
   // State machine for booking flow
   const [chatState, setChatState] = useState<ChatState>('idle');
@@ -46,6 +92,12 @@ export default function FloatingContact() {
     }
   }, [messages, isTyping]);
 
+  useEffect(() => {
+    const handleOpenChat = () => setIsChatOpen(true);
+    window.addEventListener('open-chat', handleOpenChat);
+    return () => window.removeEventListener('open-chat', handleOpenChat);
+  }, []);
+
   const handleWhatsApp = () => {
     const text = "Hi Elsan Clinic, could you please provide your clinic address and contact details?\n\nAlso, I would like to book an appointment. Here are my details:\n\n*Name:*\n*Age:*\n*Phone:*\n*Doctor Preference:*\n*Preferred Date & Time:*\n*Symptoms/Notes:*";
     window.open(`${CLINIC_INFO.whatsapp}?text=${encodeURIComponent(text)}`, "_blank");
@@ -54,35 +106,36 @@ export default function FloatingContact() {
   const processInput = async (text: string): Promise<Message> => {
     const lower = text.toLowerCase();
     const msgId = Date.now().toString();
+    const t = TRANSLATIONS[language];
 
     // Check if user wants to cancel booking
-    if (chatState !== 'idle' && (lower === 'cancel' || lower === 'menu')) {
+    if (chatState !== 'idle' && (lower === 'cancel' || lower === 'menu' || lower === 'ரத்து' || lower.includes('மெனு'))) {
       setChatState('idle');
       setBookingData({});
-      return { ...INITIAL_MESSAGE, id: msgId, text: "Booking cancelled. How else can I help you?" };
+      return { ...getInitialMessage(language), id: msgId, text: t.cancel };
     }
 
     // Booking Flow State Machine
     if (chatState === 'booking_name') {
       setBookingData((prev: any) => ({ ...prev, full_name: text }));
       setChatState('booking_phone');
-      return { id: msgId, role: 'bot', text: `Thank you, ${text}. What is your phone number?` };
+      return { id: msgId, role: 'bot', text: t.askPhone.replace('{name}', text) };
     }
 
     if (chatState === 'booking_phone') {
       setBookingData((prev: any) => ({ ...prev, phone: text }));
       setChatState('booking_age');
-      return { id: msgId, role: 'bot', text: `Got it. What is your age?` };
+      return { id: msgId, role: 'bot', text: t.askAge };
     }
 
     if (chatState === 'booking_age') {
       const age = parseInt(text.replace(/[^0-9]/g, ''));
       if (isNaN(age)) {
-        return { id: msgId, role: 'bot', text: `Please enter a valid number for your age.` };
+        return { id: msgId, role: 'bot', text: t.invalidAge };
       }
       setBookingData((prev: any) => ({ ...prev, age }));
       setChatState('booking_gender');
-      return { id: msgId, role: 'bot', text: `Thanks. Please select your gender.`, options: ['Male', 'Female', 'Other'] };
+      return { id: msgId, role: 'bot', text: t.askGender, options: [t.optMale, t.optFemale, t.optOther] };
     }
 
     if (chatState === 'booking_gender') {
@@ -91,8 +144,8 @@ export default function FloatingContact() {
       return { 
         id: msgId, 
         role: 'bot', 
-        text: `Which doctor would you like to consult?`,
-        options: ['Any Available Doctor', ...DOCTORS.slice(0,3).map(d => d.name)]
+        text: t.askDoc,
+        options: [t.optAnyDoc, ...DOCTORS.slice(0,3).map(d => d.name)]
       };
     }
 
@@ -102,31 +155,54 @@ export default function FloatingContact() {
       return { 
         id: msgId, 
         role: 'bot', 
-        text: `When would you like to visit? Select an option or type a date (YYYY-MM-DD).`,
+        text: t.askDate,
         options: [getNextDateStr(0), getNextDateStr(1), getNextDateStr(2)]
       };
     }
 
     if (chatState === 'booking_date') {
-      // Basic extraction of date
       let dateVal = text;
-      if (lower.includes('today')) dateVal = getNextDateStr(0);
-      else if (lower.includes('tomorrow')) dateVal = getNextDateStr(1);
+      if (lower.includes('today') || lower.includes('இன்று')) dateVal = getNextDateStr(0);
+      else if (lower.includes('tomorrow') || lower.includes('நாளை')) dateVal = getNextDateStr(1);
       
       setBookingData((prev: any) => ({ ...prev, appointment_date: dateVal }));
       setChatState('booking_time');
       return { 
         id: msgId, 
         role: 'bot', 
-        text: `Great. What time would you prefer?`,
+        text: t.askTime,
         options: ['10:00', '14:00', '18:00']
       };
     }
 
     if (chatState === 'booking_time') {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8009/api/v1';
+        const docName = encodeURIComponent(bookingData.doctor_name || '');
+        const dateVal = encodeURIComponent(bookingData.appointment_date || '');
+        const timeVal = encodeURIComponent(text);
+        
+        const res = await fetch(`${apiUrl}/appointments/public/check-availability?doctor_name=${docName}&date=${dateVal}&time=${timeVal}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (!data.available) {
+            return {
+              id: msgId,
+              role: 'bot',
+              text: language === 'ta' 
+                ? 'மன்னிக்கவும், அந்த நேரத்தில் மருத்துவருக்கு வேறு முன்பதிவு உள்ளது. தயவுசெய்து வேறு நேரத்தை தேர்ந்தெடுக்கவும் (அல்லது தட்டச்சு செய்யவும்).' 
+                : 'Sorry, the doctor already has an appointment at that time. Please choose or type another time.',
+              options: ['10:00', '14:00', '18:00']
+            };
+          }
+        }
+      } catch (err) {
+        console.error("Availability check failed:", err);
+      }
+
       setBookingData((prev: any) => ({ ...prev, appointment_time: text }));
       setChatState('booking_notes');
-      return { id: msgId, role: 'bot', text: `Almost done. Please describe any symptoms or reason for visit (or type 'None').` };
+      return { id: msgId, role: 'bot', text: t.askNotes };
     }
 
     if (chatState === 'booking_notes') {
@@ -134,7 +210,6 @@ export default function FloatingContact() {
       setChatState('idle'); // Reset state
       setBookingData({}); // Clear buffer
 
-      // API Call to Backend
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8009/api/v1';
         const res = await fetch(`${apiUrl}/appointments/public`, {
@@ -144,74 +219,58 @@ export default function FloatingContact() {
         });
 
         if (res.ok) {
-          return { 
-            id: msgId, 
-            role: 'bot', 
-            text: `✅ Appointment Confirmed!\n\nYour appointment with ${finalData.doctor_name} is scheduled for ${finalData.appointment_date} at ${finalData.appointment_time}. Our team will contact you at ${finalData.phone}.\n\nThank you for choosing Elsan Clinic!`,
-            options: ['Main Menu']
-          };
+          const successTxt = t.success
+            .replace('{doc}', finalData.doctor_name)
+            .replace('{date}', finalData.appointment_date)
+            .replace('{time}', finalData.appointment_time)
+            .replace('{phone}', finalData.phone);
+          return { id: msgId, role: 'bot', text: successTxt, options: [t.optMenu] };
         } else {
-          return { id: msgId, role: 'bot', text: `Sorry, there was an error processing your appointment. Please try again or call our clinic directly.`, options: ['Main Menu'] };
+          return { id: msgId, role: 'bot', text: t.err, options: [t.optMenu] };
         }
       } catch (err) {
-        return { id: msgId, role: 'bot', text: `Sorry, we couldn't connect to our servers. Please call us to book instead.`, options: ['Main Menu'] };
+        return { id: msgId, role: 'bot', text: t.netErr, options: [t.optMenu] };
       }
     }
 
     // Direct WhatsApp Redirect
-    if (lower.includes('whatsapp')) {
+    if (lower.includes('whatsapp') || lower.includes('வாட்ஸ்அப்')) {
       setTimeout(() => {
         handleWhatsApp();
       }, 1000);
-      return {
-        id: msgId,
-        role: 'bot',
-        text: 'I am redirecting you to our official WhatsApp support...',
-        options: ['Main Menu']
-      };
+      return { id: msgId, role: 'bot', text: t.redirectWa, options: [t.optMenu] };
     }
-
 
     // IDLE Flow Logic
-    if (lower.includes('book') || lower.includes('appointment')) {
+    if (lower.includes('book') || lower.includes('appointment') || lower.includes('முன்பதிவு')) {
       setChatState('booking_name');
-      return {
-        id: msgId,
-        role: 'bot',
-        text: 'I can help you book an appointment right here! To start, may I know your full name?',
-      };
+      return { id: msgId, role: 'bot', text: t.startBook };
     }
     
-    if (lower.includes('doctor') || lower.includes('specialist') || lower.includes('find')) {
+    if (lower.includes('doctor') || lower.includes('specialist') || lower.includes('find') || lower.includes('மருத்துவர்')) {
       const docNames = DOCTORS.map(d => `• ${d.name} (${d.specialties[0]})`).join('\n');
+      const docTxt = language === 'en' 
+        ? `Here are some of our top specialists:\n\n${docNames}\n\nWould you like to book a consultation?`
+        : `எங்கள் சிறந்த நிபுணர்கள்:\n\n${docNames}\n\nமுன்பதிவு செய்ய விரும்புகிறீர்களா?`;
       return {
-        id: msgId,
-        role: 'bot',
-        text: `Here are some of our top specialists:\n\n${docNames}\n\nWould you like to book a consultation?`,
-        options: ['Yes, book appointment', 'Main Menu']
+        id: msgId, role: 'bot', text: docTxt,
+        options: [language === 'en' ? 'Yes, book appointment' : 'ஆம், முன்பதிவு செய்', t.optMenu]
       };
     }
     
-    if (lower.includes('about') || lower.includes('clinic') || lower.includes('where') || lower.includes('location') || lower.includes('details')) {
-      return {
-        id: msgId,
-        role: 'bot',
-        text: `${CLINIC_INFO.name} - ${CLINIC_INFO.tagline}.\nEstablished ${CLINIC_INFO.established}.\n\n📍 Address: ${CLINIC_INFO.address}\n📞 Phone: ${CLINIC_INFO.phone}\n✉️ Email: info@elsanclinic.com\n\nWe provide 24/7 emergency care and telemedicine services.`,
-        options: ['Book Appointment', 'WhatsApp Us', 'Main Menu']
-      };
+    if (lower.includes('about') || lower.includes('clinic') || lower.includes('where') || lower.includes('location') || lower.includes('முகவரி') || lower.includes('கிளினிக்')) {
+      const aboutTxt = language === 'en'
+        ? `${CLINIC_INFO.name} - ${CLINIC_INFO.tagline}.\nEstablished ${CLINIC_INFO.established}.\n\n📍 Address: ${CLINIC_INFO.address}\n📞 Phone: ${CLINIC_INFO.phone}\n✉️ Email: info@elsanclinic.com\n\nWe provide 24/7 emergency care and telemedicine services.`
+        : `${CLINIC_INFO.name} - ${CLINIC_INFO.tagline}.\n\n📍 முகவரி: ${CLINIC_INFO.address}\n📞 தொலைபேசி: ${CLINIC_INFO.phone}\n✉️ மின்னஞ்சல்: info@elsanclinic.com`;
+      return { id: msgId, role: 'bot', text: aboutTxt, options: [t.optBook, t.optWhatsApp, t.optMenu] };
     }
 
-    if (lower.includes('back') || lower.includes('menu')) {
-      return { ...INITIAL_MESSAGE, id: msgId };
+    if (lower.includes('back') || lower.includes('menu') || lower.includes('மெனு')) {
+      return { ...getInitialMessage(language), id: msgId };
     }
 
     // Fallback logic
-    return {
-      id: msgId,
-      role: 'bot',
-      text: "I'm a virtual assistant. I can help you book an appointment, find a doctor, or give you clinic info. How can I help?",
-      options: ['Book Appointment', 'Clinic Details', 'WhatsApp Us']
-    };
+    return { id: msgId, role: 'bot', text: t.fallback, options: [t.optBook, t.optWhatsApp] };
   };
 
   const handleSend = (text: string) => {
@@ -257,12 +316,22 @@ export default function FloatingContact() {
                   <span className="w-1.5 h-1.5 bg-green-400 rounded-full animate-pulse"></span> Online • AI Assistant
                 </p>
               </div>
-              <button 
-                onClick={() => setIsChatOpen(false)}
-                className="p-1.5 hover:bg-white/20 rounded-full transition-colors"
-              >
-                <X size={18} />
-              </button>
+              <div className="flex gap-2">
+                <select 
+                  value={language} 
+                  onChange={(e) => setLanguage(e.target.value as 'en'|'ta')}
+                  className="bg-teal-800/50 border border-teal-600/50 text-[11px] px-2 py-1 rounded outline-none cursor-pointer"
+                >
+                  <option value="en">EN</option>
+                  <option value="ta">தமிழ்</option>
+                </select>
+                <button 
+                  onClick={() => setIsChatOpen(false)}
+                  className="p-1.5 hover:bg-white/20 rounded-full transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
             </div>
 
             {/* Chat Area */}
@@ -351,22 +420,6 @@ export default function FloatingContact() {
 
       {/* Floating Buttons */}
       <div className="flex flex-col gap-4">
-        {/* WhatsApp Button */}
-        <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-          onClick={handleWhatsApp}
-          className="w-14 h-14 rounded-full shadow-2xl flex items-center justify-center text-white transition-colors relative group bg-[#25D366] hover:bg-[#1EBE5A]"
-          aria-label="WhatsApp"
-        >
-          <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
-            </svg>
-          <span className="absolute right-16 bg-slate-900/90 backdrop-blur text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md pointer-events-none border border-white/10">
-            WhatsApp Us
-          </span>
-        </motion.button>
-
         {/* Chatbot Button */}
         <motion.button
           whileHover={{ scale: 1.1 }}
@@ -380,7 +433,7 @@ export default function FloatingContact() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
             </svg>
           ) : (
-            <MessageSquare size={26} />
+            <Bot size={28} className="animate-pulse" />
           )}
           {!isChatOpen && (
             <span className="absolute right-16 bg-slate-900/90 backdrop-blur text-white text-[11px] font-semibold px-3 py-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-md pointer-events-none border border-white/10">

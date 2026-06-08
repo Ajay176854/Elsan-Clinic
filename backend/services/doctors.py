@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from core.security import get_password_hash
+from core.security import get_password_hash, verify_password
 from repositories.doctors import DoctorRepository
 from schemas.doctors import DoctorCreate, DoctorUpdate
 from models.domain import User, Doctor, RoleEnum
@@ -88,3 +88,19 @@ class DoctorService:
     async def delete_doctor(self, doctor_id: str) -> None:
         doctor = await self.get_doctor(doctor_id)
         await self.repo.delete(doctor.user, doctor)
+
+    async def get_doctor_stats(self, doctor_id: str) -> dict:
+        # Verify doctor exists first
+        await self.get_doctor(doctor_id)
+        return await self.repo.get_doctor_stats(doctor_id)
+
+    async def reset_password(self, doctor_id: str, admin_user: User, admin_password: str, new_password: str) -> Doctor:
+        # Verify admin password
+        if not verify_password(admin_password, admin_user.password_hash):
+            raise HTTPException(status_code=401, detail="Invalid admin password")
+
+        doctor = await self.get_doctor(doctor_id)
+        user = doctor.user
+        user.password_hash = get_password_hash(new_password)
+        return await self.repo.update(user, doctor)
+

@@ -1,7 +1,9 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy.orm import selectinload
-from models.domain import User, Doctor, RoleEnum
+from models.domain import User, Doctor, RoleEnum, Appointment, Prescription
+from sqlalchemy import func
+from datetime import date
 
 class DoctorRepository:
     def __init__(self, db: AsyncSession):
@@ -51,3 +53,30 @@ class DoctorRepository:
         await self.db.delete(doctor)
         await self.db.delete(user)
         await self.db.commit()
+
+    async def get_doctor_stats(self, doctor_id: str) -> dict:
+        today = date.today()
+        
+        result = await self.db.execute(
+            select(func.count(func.distinct(Appointment.patient_id)))
+            .where(Appointment.doctor_id == doctor_id, Appointment.appointment_date == today)
+        )
+        patients_today = result.scalar() or 0
+
+        result = await self.db.execute(
+            select(func.count(Appointment.id))
+            .where(Appointment.doctor_id == doctor_id)
+        )
+        total_appointments = result.scalar() or 0
+
+        result = await self.db.execute(
+            select(func.count(Prescription.id))
+            .where(Prescription.doctor_id == doctor_id)
+        )
+        total_prescriptions = result.scalar() or 0
+
+        return {
+            "patients_today": patients_today,
+            "total_appointments": total_appointments,
+            "total_prescriptions": total_prescriptions
+        }

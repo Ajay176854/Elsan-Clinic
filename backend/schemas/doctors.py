@@ -41,6 +41,7 @@ class DoctorResponse(BaseModel):
     consultation_fee: int
     consultation_timings: Optional[str]
     signature_url: Optional[str]
+    profile_pic_url: Optional[str]
     is_active: bool
     status: bool # doctor specific status
     created_at: datetime
@@ -48,3 +49,12 @@ class DoctorResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class DoctorStatsResponse(BaseModel):
+    patients_today: int
+    total_appointments: int
+    total_prescriptions: int
+
+class PasswordResetRequest(BaseModel):
+    admin_password: str = Field(..., min_length=1)
+    new_password: str = Field(..., min_length=8)

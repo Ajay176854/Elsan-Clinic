@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { BedDouble, Phone, Loader2, Plus, Search } from 'lucide-react';
-import { useAdmissions, useDischargeAdmission } from "../../../hooks";
+import { useAdmissions, useDischargeAdmission, useUser } from "../../../hooks";
 import { PatientAdmissionModal } from "../../../components/dashboard/PatientAdmissionModal";
 import { DailyVisitModal } from "../../../components/dashboard/DailyVisitModal";
 import { DischargeConfirmModal } from "../../../components/dashboard/DischargeConfirmModal";
@@ -12,6 +12,8 @@ import { Input } from "../../../components/ui/input";
 export default function InpatientsPage() {
   const { data: admissions = [], isLoading } = useAdmissions();
   const { mutateAsync: dischargePatient, isPending: isDischarging } = useDischargeAdmission();
+  const { data: user } = useUser();
+  const isAdmin = user && ['SUPER_ADMIN', 'DIRECTOR'].includes(user.role);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [isAdmissionModalOpen, setIsAdmissionModalOpen] = useState(false);
@@ -97,10 +99,12 @@ export default function InpatientsPage() {
           <h1 className="text-2xl font-bold text-slate-800">Inpatients Management</h1>
           <p className="text-sm text-slate-500 mt-1">Manage currently admitted patients, assign beds, and log daily checks.</p>
         </div>
-        <Button onClick={() => setIsAdmissionModalOpen(true)} className="bg-orange-600 hover:bg-orange-700 text-white">
-          <Plus className="w-4 h-4 mr-2" />
-          Admit Patient
-        </Button>
+        {!isAdmin && (
+          <Button onClick={() => setIsAdmissionModalOpen(true)} className="bg-orange-600 hover:bg-orange-700 text-white">
+            <Plus className="w-4 h-4 mr-2" />
+            Admit Patient
+          </Button>
+        )}
       </div>
 
       <div className="relative">
@@ -129,7 +133,7 @@ export default function InpatientsPage() {
             <div className="p-12 text-center text-slate-500">
               <BedDouble className="w-16 h-16 text-slate-200 mx-auto mb-4" />
               <p className="text-lg font-medium text-slate-600">No patients are currently admitted.</p>
-              <p className="text-sm text-slate-400 mt-2">Click "Admit Patient" above to admit a new patient.</p>
+              {!isAdmin && <p className="text-sm text-slate-400 mt-2">Click "Admit Patient" above to admit a new patient.</p>}
             </div>
           ) : (
             <div className="divide-y divide-slate-100">
@@ -181,18 +185,22 @@ export default function InpatientsPage() {
                       >
                         {expandedAdmissions[adm.id] ? 'Hide History' : 'View History'}
                       </button>
-                      <button 
-                        onClick={() => setDailyVisitModalState({ isOpen: true, admissionId: adm.id, patientName: adm.patient_name })}
-                        className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-100 rounded-lg transition-colors text-center"
-                      >
-                        Log Daily Check
-                      </button>
-                      <button 
-                        onClick={() => setDischargeModalState({ isOpen: true, admissionId: adm.id, patientName: adm.patient_name })}
-                        className="px-4 py-2 text-sm font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 rounded-lg transition-colors text-center"
-                      >
-                        Discharge Patient
-                      </button>
+                      {!isAdmin && (
+                        <>
+                          <button 
+                            onClick={() => setDailyVisitModalState({ isOpen: true, admissionId: adm.id, patientName: adm.patient_name })}
+                            className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 hover:bg-blue-100 border border-blue-100 rounded-lg transition-colors text-center"
+                          >
+                            Log Daily Check
+                          </button>
+                          <button 
+                            onClick={() => setDischargeModalState({ isOpen: true, admissionId: adm.id, patientName: adm.patient_name })}
+                            className="px-4 py-2 text-sm font-medium text-emerald-600 bg-emerald-50 hover:bg-emerald-100 border border-emerald-100 rounded-lg transition-colors text-center"
+                          >
+                            Discharge Patient
+                          </button>
+                        </>
+                      )}
                     </div>
                   </div>
                   {renderDailyVisits(adm)}

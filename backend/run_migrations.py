@@ -104,6 +104,14 @@ async def run_migrations():
         except Exception as e:
             print(f"Error adding dynamic_fields: {e}")
 
+        # 8. Add profile pic to doctors
+        try:
+            await conn.execute(text("ALTER TABLE doctors ADD COLUMN profile_pic_url VARCHAR(500);"))
+            await conn.execute(text("ALTER TABLE doctors ADD COLUMN profile_pic_public_id VARCHAR(255);"))
+            print("Successfully added profile_pic fields to doctors.")
+        except Exception as e:
+            print(f"Error adding profile pic fields to doctors: {e}")
+
     await engine.dispose()
     print("Database migrations completed.")
 
