@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import func, case
+from sqlalchemy import func, case, text
 from sqlalchemy.future import select
 from datetime import datetime, timezone
 from models.domain import User, Doctor, Patient, Visit, Prescription, Appointment, WhatsAppLog, RoleEnum, WhatsAppStatus, AppointmentStatus
@@ -43,7 +43,7 @@ class DashboardRepository:
         stmt = select(
             func.date(Patient.created_at).label("date"), 
             func.count(Patient.id).label("count")
-        ).group_by(func.date(Patient.created_at)).order_by(func.date(Patient.created_at))
+        ).group_by(text("date")).order_by(text("date"))
         result = await self.db.execute(stmt)
         return result.all()
 
@@ -53,12 +53,12 @@ class DashboardRepository:
             stmt = select(
                 func.date_trunc('month', Visit.created_at).label("date"),
                 func.count(Visit.id).label("count")
-            ).group_by(func.date_trunc('month', Visit.created_at)).order_by(func.date_trunc('month', Visit.created_at))
+            ).group_by(text("date")).order_by(text("date"))
         else:
             stmt = select(
                 func.date(Visit.created_at).label("date"),
                 func.count(Visit.id).label("count")
-            ).group_by(func.date(Visit.created_at)).order_by(func.date(Visit.created_at))
+            ).group_by(text("date")).order_by(text("date"))
         
         result = await self.db.execute(stmt)
         return result.all()

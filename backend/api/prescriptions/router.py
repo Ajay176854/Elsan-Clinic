@@ -64,7 +64,22 @@ async def create_prescription(
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
 
-    clinic_data = {"name": "Elsan Clinic", "phone": "+91 98765 43210"}
+    # Fetch Clinic Settings
+    from repositories.settings import SettingsRepository
+    settings_repo = SettingsRepository(db)
+    settings = await settings_repo.get_settings()
+
+    clinic_data = {
+        "name": settings.clinic_name, 
+        "phone": settings.phone,
+        "address": settings.physical_address,
+        "email": settings.email,
+        "website": settings.website,
+        "logo_url": settings.logo_url,
+        "working_hours_mon_fri": settings.working_hours_mon_fri,
+        "working_hours_sat_sun": settings.working_hours_sat_sun
+        # explicit exclusion: google_maps_url is omitted for prescriptions
+    }
     doctor_data = {"name": current_user.full_name, "specialization": "General Physician"}
     patient_data = {"name": patient.full_name, "id": patient.patient_code, "age": str(patient.age), "gender": patient.gender, "phone": patient.phone, "date": "Today"}
     
@@ -188,7 +203,22 @@ async def regenerate_pdf(
 
     # In a real app we fetch updated patient/doctor details again.
     # We pass placeholders to the service regenerator for demonstration
-    clinic_data = {"name": "Elsan Clinic", "phone": "+91 98765 43210"}
+    # Fetch Clinic Settings
+    from repositories.settings import SettingsRepository
+    settings_repo = SettingsRepository(db)
+    settings = await settings_repo.get_settings()
+
+    clinic_data = {
+        "name": settings.clinic_name, 
+        "phone": settings.phone,
+        "address": settings.physical_address,
+        "email": settings.email,
+        "website": settings.website,
+        "logo_url": settings.logo_url,
+        "working_hours_mon_fri": settings.working_hours_mon_fri,
+        "working_hours_sat_sun": settings.working_hours_sat_sun
+        # explicit exclusion: google_maps_url is omitted for prescriptions
+    }
     doctor_data = {"name": presc.doctor.user.full_name if presc.doctor else "", "specialization": presc.doctor.specialization if presc.doctor else ""}
     patient_data = {"name": presc.patient.full_name if presc.patient else "", "id": presc.patient.patient_code if presc.patient else "", "age": str(presc.patient.age) if presc.patient else "", "gender": presc.patient.gender if presc.patient else "", "phone": presc.patient.phone if presc.patient else "", "date": "Updated"}
     

@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
-import { Calendar as CalendarIcon, Clock, Users, Activity, Phone, UserPlus, FileText, CheckCircle, Search, AlertCircle, Loader2, ArrowRight, BedDouble } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Users, Activity, Phone, UserPlus, FileText, CheckCircle, Search, AlertCircle, Loader2, ArrowRight, BedDouble, CalendarDays } from 'lucide-react';
 import { usePatients, useAppointments, useVisits, useDoctors, useAdmissions, useDischargeAdmission } from '../../hooks';
+import { useMyRosters } from '../../hooks/use-rosters';
 
 import { PatientRegistrationModal } from "./PatientRegistrationModal";
 import { VisitCreationModal } from "./VisitCreationModal";
@@ -14,6 +15,8 @@ interface ReceptionistDashboardProps {
 export default function ReceptionistDashboard({ 
   onNavigateToTab 
 }: ReceptionistDashboardProps) {
+  const { data: rosters, isLoading: loadingRosters } = useMyRosters();
+  
   const format12Hour = (timeStr: string) => {
     if (!timeStr) return '';
     const [h, m] = timeStr.split(':');
@@ -55,6 +58,9 @@ export default function ReceptionistDashboard({
   });
 
   const isLoading = isLoadingPatients || isLoadingAppts || isLoadingVisits || isLoadingAdmissions;
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const upcomingRoster = rosters?.filter((r: any) => r.date >= todayStr).sort((a: any, b: any) => a.date.localeCompare(b.date))[0];
 
   const metrics = useMemo(() => {
     const now = new Date();
@@ -389,6 +395,29 @@ export default function ReceptionistDashboard({
                 <li className="text-rose-600/70 italic text-sm">No critical alerts currently.</li>
               )}
             </ul>
+          </div>
+
+          {/* 7. Next Shift */}
+          <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 p-6 rounded-xl shadow-sm text-white">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-white/20 rounded-lg">
+                <CalendarDays className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="font-semibold text-lg">Next Shift</h3>
+            </div>
+            {loadingRosters ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : upcomingRoster ? (
+              <div>
+                <p className="text-3xl font-bold mb-1">{upcomingRoster.date === new Date().toISOString().split('T')[0] ? 'Today' : upcomingRoster.date}</p>
+                <div className="flex items-center gap-2 text-indigo-100">
+                  <span className="bg-white/20 px-2 py-1 rounded text-xs font-medium">{upcomingRoster.shift_type.replace('_', ' ')}</span>
+                  <span className="text-sm font-medium">{format12Hour(upcomingRoster.start_time)} - {format12Hour(upcomingRoster.end_time)}</span>
+                </div>
+              </div>
+            ) : (
+              <p className="text-indigo-100 text-sm font-medium">No upcoming shifts assigned.</p>
+            )}
           </div>
 
         </div>

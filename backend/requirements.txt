@@ -18,3 +18,6 @@ pytest-asyncio
 aiosqlite
 qrcode
 reportlab
+pandas
+openpyxl
+python-multipart

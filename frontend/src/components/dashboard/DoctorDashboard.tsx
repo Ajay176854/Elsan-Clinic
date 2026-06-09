@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, CalendarDays } from "lucide-react";
 import { appointmentApi } from "../../services/api";
 import { useRouter, usePathname } from "next/navigation";
+import { useMyRosters } from "../../hooks/use-rosters";
 
 export default function DoctorDashboard({ user }: { user: any }) {
   const router = useRouter();
   const pathname = usePathname();
   const [appointments, setAppointments] = useState<any[]>([]);
   const [loadingAppts, setLoadingAppts] = useState(true);
+  
+  const { data: rosters, isLoading: loadingRosters } = useMyRosters();
 
   let basePath = "/admin";
   if (pathname.startsWith("/elsanclinic/doctor-dashboard")) {
@@ -69,6 +72,8 @@ export default function DoctorDashboard({ user }: { user: any }) {
     }
   }, [user]);
 
+  const upcomingRoster = rosters?.filter(r => r.date >= todayStr).sort((a, b) => a.date.localeCompare(b.date))[0];
+
   return (
     <div className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -93,6 +98,28 @@ export default function DoctorDashboard({ user }: { user: any }) {
                 <span className="text-xs font-medium text-center">Patient History</span>
               </button>
             </div>
+          </div>
+
+          <div className="bg-gradient-to-br from-indigo-500 to-indigo-600 p-6 rounded-xl shadow-sm text-white">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-2 bg-white/20 rounded-lg">
+                <CalendarDays className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="font-semibold text-lg">Next Shift</h3>
+            </div>
+            {loadingRosters ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : upcomingRoster ? (
+              <div>
+                <p className="text-3xl font-bold mb-1">{upcomingRoster.date === todayStr ? 'Today' : upcomingRoster.date}</p>
+                <div className="flex items-center gap-2 text-indigo-100">
+                  <span className="bg-white/20 px-2 py-1 rounded text-xs font-medium">{upcomingRoster.shift_type.replace('_', ' ')}</span>
+                  <span className="text-sm font-medium">{format12Hour(upcomingRoster.start_time)} - {format12Hour(upcomingRoster.end_time)}</span>
+                </div>
+              </div>
+            ) : (
+              <p className="text-indigo-100 text-sm font-medium">No upcoming shifts assigned.</p>
+            )}
           </div>
         </div>
       </div>

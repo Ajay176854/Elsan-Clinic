@@ -131,9 +131,12 @@ function HeroVideoCarousel({ setActiveTab }: { setActiveTab: (tab: string) => vo
   );
 }
 
+import { useSettings } from '../hooks';
+
 export default function LandingPage() {
   const [activeTab, setActiveTab] = useState('home');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { settings } = useSettings();
 
   return (
     <AuroraBackground className="min-h-screen min-w-full flex flex-col justify-start items-stretch font-sans text-slate-800" showRadialGradient={true}>
@@ -205,7 +208,7 @@ export default function LandingPage() {
             <button onClick={() => setActiveTab('book')} className="bg-orange-500 text-white px-5 py-2.5 rounded-lg font-bold text-sm hover:bg-orange-600 active:scale-95 hover:-translate-y-0.5 transition-all duration-300 shadow-sm hover:shadow-md flex items-center gap-2">
               <Calendar size={16} /> Book Appt
             </button>
-            <a href="tel:9444184977" className="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-teal-50 text-teal-600 hover:bg-teal-100 transition" aria-label="Call us">
+            <a href={`tel:${settings?.phone?.replace(/\s/g, '') || '9444184977'}`} className="hidden md:flex items-center justify-center w-10 h-10 rounded-full bg-teal-50 text-teal-600 hover:bg-teal-100 transition" aria-label="Call us">
               <Phone size={18} />
             </a>
             <div className="hidden md:block w-px h-5 bg-slate-200"></div>
@@ -574,7 +577,7 @@ export default function LandingPage() {
             <div>
               <h3 className="text-white font-semibold mb-4 border-b border-slate-700 pb-2">Consultation Hours</h3>
               <ul className="space-y-3 text-sm">
-                <li className="flex gap-2 items-start"><Clock size={16} className="text-blue-400 mt-0.5 shrink-0" /> <div>Mon – Sat: 8:30 AM – 7:30 PM<br /><span className="text-slate-500">Sun: Emergency Only</span></div></li>
+                <li className="flex gap-2 items-start"><Clock size={16} className="text-blue-400 mt-0.5 shrink-0" /> <div>{settings?.working_hours_mon_fri}<br /><span className="text-slate-500">{settings?.working_hours_sat_sun}</span></div></li>
               </ul>
               <h3 className="text-white font-semibold mt-6 mb-3 border-b border-slate-700 pb-2">Accreditations</h3>
               <div className="flex flex-wrap gap-2">
@@ -586,8 +589,8 @@ export default function LandingPage() {
             <div>
               <h3 className="text-white font-semibold mb-4 border-b border-slate-700 pb-2">Contact Us</h3>
               <ul className="space-y-3 text-sm">
-                <li className="flex items-center gap-2"><Phone size={16} className="text-teal-400" /><a href="tel:9444184977" className="font-medium text-white hover:text-teal-400 transition">{CLINIC_INFO.phone}</a></li>
-                <li className="flex items-start gap-2"><MapPin size={16} className="text-teal-400 mt-0.5 shrink-0" /><span className="text-slate-400 text-xs leading-relaxed">{CLINIC_INFO.address}</span></li>
+                <li className="flex items-center gap-2"><Phone size={16} className="text-teal-400" /><a href={`tel:${settings?.phone?.replace(/\s/g, '') || '9444184977'}`} className="font-medium text-white hover:text-teal-400 transition">{settings?.phone || CLINIC_INFO.phone}</a></li>
+                <li className="flex items-start gap-2"><MapPin size={16} className="text-teal-400 mt-0.5 shrink-0" /><span className="text-slate-400 text-xs leading-relaxed whitespace-pre-wrap">{settings?.physical_address || CLINIC_INFO.address}</span></li>
               </ul>
             </div>
           </div>

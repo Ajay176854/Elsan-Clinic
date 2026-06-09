@@ -5,7 +5,7 @@ from database.database import get_db
 from dependencies.auth import get_current_user
 from middleware.rbac import require_roles
 from models.domain import User
-from schemas.staff import StaffCreate, StaffUpdate, StaffResponse
+from schemas.staff import StaffCreate, StaffUpdate, StaffResponse, PasswordResetRequest
 from repositories.staff import StaffRepository
 from services.staff import StaffService
 
@@ -84,4 +84,15 @@ async def deactivate_staff(
     service: StaffService = Depends(get_staff_service)
 ):
     user = await service.set_active_status(id, False)
+    return map_response(user)
+
+@router.patch("/{id}/reset-password", response_model=StaffResponse)
+@require_roles(["SUPER_ADMIN", "DIRECTOR"])
+async def reset_staff_password(
+    id: str,
+    data: PasswordResetRequest,
+    current_user: User = Depends(get_current_user),
+    service: StaffService = Depends(get_staff_service)
+):
+    user = await service.reset_password(id, current_user, data.admin_password, data.new_password)
     return map_response(user)

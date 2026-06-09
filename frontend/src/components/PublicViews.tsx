@@ -5,6 +5,7 @@ import { motion } from 'framer-motion';
 import { ChevronRight, ArrowRight, Activity, HeartPulse, Stethoscope, Pill, Baby, Users, Microscope, Calendar, Star, Building2, MapPin, User, Phone, BookOpen, Ambulance, BrainCircuit, FileText } from 'lucide-react';
 import { DOCTORS, SERVICES } from '../data';
 import type { ViewState } from '../types';
+import { useSettings } from '../hooks';
 
 // Map icon strings to real lucide components safely
 const ICON_MAP: Record<string, any> = {
@@ -592,6 +593,8 @@ export function ServicesView({ onNavigate }: { onNavigate?: (v: ViewState) => vo
 }
 
 export function ContactView() {
+  const { settings, isLoading } = useSettings();
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-4xl mx-auto space-y-8">
       <div className="text-center space-y-4 mb-10">
@@ -599,42 +602,59 @@ export function ContactView() {
         <p className="text-lg text-slate-600">We are here to help. Reach out for any medical assistance.</p>
       </div>
       
+      {isLoading ? (
+        <div className="flex justify-center p-12"><div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div></div>
+      ) : (
       <div className="grid md:grid-cols-2 gap-6">
         <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
           <div className="flex items-start gap-4">
             <div className="bg-blue-50 text-blue-600 p-3 rounded-xl"><Building2 size={24}/></div>
             <div>
               <h3 className="font-bold text-slate-800 text-lg">Clinic Address</h3>
-              <p className="text-slate-600 mt-1 leading-relaxed">
-                Elsan Clinic<br/>
-                No 12, Main Road, T Nagar<br/>
-                Chennai, Tamil Nadu - 600017
+              <p className="text-slate-600 mt-1 leading-relaxed whitespace-pre-wrap">
+                {settings?.physical_address || "Elsan Clinic"}
               </p>
             </div>
           </div>
           <div className="flex items-start gap-4">
             <div className="bg-green-50 text-green-600 p-3 rounded-xl"><Phone size={24}/></div>
             <div>
-              <h3 className="font-bold text-slate-800 text-lg">Phone Number</h3>
-              <p className="text-slate-600 mt-1">+91 44 2434 5678<br/>+91 98765 43210</p>
+              <h3 className="font-bold text-slate-800 text-lg">Contact Info</h3>
+              <p className="text-slate-600 mt-1">Phone: {settings?.phone}<br/>Email: {settings?.email}</p>
             </div>
           </div>
           <div className="flex items-start gap-4">
             <div className="bg-orange-50 text-orange-600 p-3 rounded-xl"><Calendar size={24}/></div>
             <div>
               <h3 className="font-bold text-slate-800 text-lg">Working Hours</h3>
-              <p className="text-slate-600 mt-1">Monday - Saturday: 9:00 AM - 9:00 PM<br/>Sunday: 9:00 AM - 1:00 PM</p>
+              <p className="text-slate-600 mt-1">{settings?.working_hours_mon_fri}<br/>{settings?.working_hours_sat_sun}</p>
             </div>
           </div>
         </div>
         
         <div className="bg-slate-200 rounded-2xl overflow-hidden shadow-inner h-[400px] flex items-center justify-center relative">
-           <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80" alt="Clinic Location" className="absolute inset-0 w-full h-full object-cover opacity-70" />
-           <div className="relative bg-white/90 backdrop-blur px-6 py-3 rounded-full shadow-lg font-bold text-slate-800 flex items-center gap-2">
-             <MapPin className="text-red-500" /> Map Integration Placeholder
-           </div>
+          {settings?.google_maps_url ? (
+            <iframe 
+              src={settings.google_maps_url} 
+              width="100%" 
+              height="100%" 
+              style={{ border: 0 }} 
+              allowFullScreen={true} 
+              loading="lazy" 
+              referrerPolicy="no-referrer-when-downgrade"
+              className="absolute inset-0 w-full h-full"
+            ></iframe>
+          ) : (
+            <>
+              <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80" alt="Clinic Location" className="absolute inset-0 w-full h-full object-cover opacity-70" />
+              <div className="relative bg-white/90 backdrop-blur px-6 py-3 rounded-full shadow-lg font-bold text-slate-800 flex items-center gap-2">
+                <MapPin className="text-red-500" /> Map Integration Placeholder
+              </div>
+            </>
+          )}
         </div>
       </div>
+      )}
     </motion.div>
   );
 }

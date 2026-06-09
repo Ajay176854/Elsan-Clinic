@@ -16,6 +16,11 @@ from contextlib import asynccontextmanager
 
 from routers.visits import router as visits_router
 from routers.admissions import router as admissions_router
+from routers.settings import router as settings_router
+from routers.audit_logs import router as audit_router
+from routers.rosters import router as rosters_router
+from routers.leaves import router as leaves_router
+from routers.notifications import router as notifications_router
 from services.cron_scheduler import run_scheduler
 
 @asynccontextmanager
@@ -49,6 +54,11 @@ app.include_router(prescriptions_router)
 app.include_router(whatsapp_router)
 app.include_router(visits_router)
 app.include_router(admissions_router)
+app.include_router(settings_router)
+app.include_router(audit_router)
+app.include_router(rosters_router)
+app.include_router(leaves_router)
+app.include_router(notifications_router)
 
 @app.get("/")
 def read_root():

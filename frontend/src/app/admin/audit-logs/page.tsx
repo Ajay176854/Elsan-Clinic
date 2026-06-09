@@ -3,15 +3,11 @@ import React from 'react';
 import { Card, CardContent } from "../../../components/ui/card";
 import { Search } from "lucide-react";
 import { Input } from "../../../components/ui/input";
+import { useAuditLogs } from '../../../hooks/use-audit';
+import { format } from 'date-fns';
 
 export default function AuditLogsPage() {
-  const logs = [
-    { id: 1, user: "Priya Sharma (Receptionist)", action: "Created Patient", target: "Rahul Kumar", time: "10:35 AM", date: "Today" },
-    { id: 2, user: "Dr. Raj (Doctor)", action: "Created Prescription", target: "Rahul Kumar", time: "10:45 AM", date: "Today" },
-    { id: 3, user: "Super Admin", action: "Updated Doctor", target: "Dr. Sneha", time: "09:15 AM", date: "Today" },
-    { id: 4, user: "Rahul Patel (Admin)", action: "Uploaded Medicine CSV", target: "Inventory", time: "08:30 AM", date: "Today" },
-    { id: 5, user: "Dr. Raj (Doctor)", action: "Cancelled Appointment", target: "Amit Patel", time: "Yesterday, 04:20 PM", date: "Yesterday" },
-  ];
+  const { data: logs, isLoading } = useAuditLogs();
 
   return (
     <div className="space-y-6">
@@ -41,6 +37,11 @@ export default function AuditLogsPage() {
           </select>
         </div>
         <CardContent className="p-0">
+          {isLoading ? (
+            <div className="flex justify-center items-center p-12">
+              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          ) : (
           <table className="w-full text-left text-sm">
             <thead className="bg-white border-b border-slate-200 text-slate-600">
               <tr>
@@ -51,20 +52,30 @@ export default function AuditLogsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {logs.map((log) => (
+              {logs?.map((log) => (
                 <tr key={log.id} className="hover:bg-slate-50">
-                  <td className="p-4 text-slate-500 whitespace-nowrap">{log.time}</td>
-                  <td className="p-4 font-medium text-slate-800">{log.user}</td>
+                  <td className="p-4 text-slate-500 whitespace-nowrap">
+                    {format(new Date(log.timestamp), 'PP p')}
+                  </td>
+                  <td className="p-4 font-medium text-slate-800">
+                    {log.user ? `${log.user.full_name} (${log.user.role})` : 'System'}
+                  </td>
                   <td className="p-4">
                     <span className="px-2 py-1 bg-slate-100 text-slate-700 rounded text-xs font-semibold">
                       {log.action}
                     </span>
                   </td>
-                  <td className="p-4 text-blue-600 font-medium">{log.target}</td>
+                  <td className="p-4 text-blue-600 font-medium">{log.entity_type}: {log.details || log.entity_id}</td>
                 </tr>
               ))}
+              {!logs?.length && (
+                <tr>
+                  <td colSpan={4} className="p-8 text-center text-slate-500">No audit logs found.</td>
+                </tr>
+              )}
             </tbody>
           </table>
+          )}
         </CardContent>
       </Card>
     </div>

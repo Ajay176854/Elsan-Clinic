@@ -1,10 +1,12 @@
 "use client";
 
-import { Users, UserRound, Calendar, FileText, Video, LayoutDashboard, Settings, LogOut, Loader2, BedDouble, Pill, MessageCircle, BarChart3, ShieldAlert, Lock } from "lucide-react";
+import { Users, UserRound, Calendar, FileText, Video, LayoutDashboard, Settings, LogOut, Loader2, BedDouble, Pill, MessageCircle, BarChart3, ShieldAlert, Lock, CalendarDays, CalendarOff, Bell } from "lucide-react";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from "../../lib/utils";
 import { useUser, useLogout } from "../../hooks";
+
+import { useMyNotifications } from "../../hooks/use-notifications";
 
 const getMenuItems = (role: string, basePath: string) => {
   const items = [];
@@ -20,9 +22,16 @@ const getMenuItems = (role: string, basePath: string) => {
   if (['SUPER_ADMIN', 'DIRECTOR'].includes(role)) {
     items.push({ name: "Doctors", href: `${basePath}/doctors`, icon: UserRound });
     items.push({ name: "Staff", href: `${basePath}/staff`, icon: Users });
+    items.push({ name: "Rosters", href: `${basePath}/rosters`, icon: CalendarDays });
+    items.push({ name: "Leaves", href: `${basePath}/leaves`, icon: CalendarOff });
   }
   
-  if (['SUPER_ADMIN', 'DOCTOR'].includes(role)) {
+  if (['DOCTOR', 'NURSE', 'RECEPTIONIST'].includes(role) && !['SUPER_ADMIN', 'DIRECTOR'].includes(role)) {
+    items.push({ name: "My Roster", href: `${basePath}/rosters`, icon: CalendarDays });
+    items.push({ name: "My Leaves", href: `${basePath}/leaves`, icon: CalendarOff });
+  }
+  
+  if (['DOCTOR'].includes(role)) {
     if (!items.some(i => i.name === "My Appointments" || i.name === "Appointments")) {
       items.push({ name: "My Appointments", href: `${basePath}/appointments`, icon: Calendar });
     }
@@ -30,16 +39,45 @@ const getMenuItems = (role: string, basePath: string) => {
     items.push({ name: "Prescriptions", href: `${basePath}/prescriptions`, icon: FileText });
   }
 
+  // Everyone gets notifications
+  items.push({ name: "Notifications", href: `${basePath}/notifications`, icon: Bell });
+
   if (['SUPER_ADMIN'].includes(role)) {
     items.push({ name: "Medicines", href: `${basePath}/medicines`, icon: Pill });
     items.push({ name: "WhatsApp", href: `${basePath}/whatsapp`, icon: MessageCircle });
     items.push({ name: "Reports", href: `${basePath}/reports`, icon: BarChart3 });
     items.push({ name: "Settings", href: `${basePath}/settings`, icon: Settings });
     items.push({ name: "Audit Logs", href: `${basePath}/audit-logs`, icon: ShieldAlert });
-    items.push({ name: "Permissions", href: `${basePath}/permissions`, icon: Lock });
   }
 
   return items.filter((v, i, a) => a.findIndex(t => (t.name === v.name)) === i);
+};
+
+const SidebarItem = ({ item, location }: { item: any, location: string }) => {
+  const { data: notifications } = useMyNotifications(true);
+  const unreadCount = notifications?.length || 0;
+
+  return (
+    <Link
+      href={item.href}
+      className={cn(
+        "flex items-center justify-between rounded-lg px-3 py-2.5 transition-all",
+        location === item.href
+          ? "bg-blue-50 text-blue-700 font-semibold"
+          : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
+      )}
+    >
+      <div className="flex items-center gap-3">
+        <item.icon className="h-5 w-5" />
+        {item.name}
+      </div>
+      {item.name === "Notifications" && unreadCount > 0 && (
+        <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-sm">
+          {unreadCount}
+        </span>
+      )}
+    </Link>
+  );
 };
 
 export default function Sidebar() {
@@ -72,22 +110,10 @@ export default function Sidebar() {
             </>
           )}
         </div>
-        <div className="flex-1 py-4">
+        <div className="flex-1 py-4 overflow-y-auto">
           <nav className="grid items-start px-4 text-sm font-medium gap-1">
             {!isLoading && getMenuItems(user?.role || '', basePath).map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2.5 transition-all",
-                  location === item.href
-                    ? "bg-blue-50 text-blue-700 font-semibold"
-                    : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
-                )}
-              >
-                <item.icon className="h-5 w-5" />
-                {item.name}
-              </Link>
+              <SidebarItem key={item.name} item={item} location={location} />
             ))}
           </nav>
         </div>

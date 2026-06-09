@@ -45,24 +45,46 @@ async def search_medicines(
 ):
     return await service.list_medicines(q)
 
-@router.post("/upload-csv")
+import openpyxl
+
+@router.post("/upload")
 @require_roles(["SUPER_ADMIN", "DOCTOR"])
-async def upload_csv(
+async def upload_medicines(
     file: UploadFile = File(...),
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db)
 ):
-    if not file.filename.endswith(".csv"):
-        raise HTTPException(status_code=400, detail="Invalid file type. Please upload a CSV file.")
+    if not (file.filename.endswith(".csv") or file.filename.endswith(".xlsx")):
+        raise HTTPException(status_code=400, detail="Invalid file type. Please upload a CSV or XLSX file.")
     
     content = await file.read()
-    try:
-        decoded_content = content.decode("utf-8")
-    except UnicodeDecodeError:
-        decoded_content = content.decode("latin-1")
-        
-    reader = csv.DictReader(io.StringIO(decoded_content))
+    rows = []
+    
+    if file.filename.endswith(".csv"):
+        try:
+            decoded_content = content.decode("utf-8")
+        except UnicodeDecodeError:
+            decoded_content = content.decode("latin-1")
+            
+        reader = csv.DictReader(io.StringIO(decoded_content))
+        rows = list(reader)
+    else:
+        # Process Excel file
+        wb = openpyxl.load_workbook(filename=io.BytesIO(content), data_only=True)
+        sheet = wb.active
+        headers = []
+        for i, row in enumerate(sheet.iter_rows(values_only=True)):
+            if i == 0:
+                headers = [str(cell) if cell else f"Column_{j}" for j, cell in enumerate(row)]
+            else:
+                row_dict = {}
+                for j, cell in enumerate(row):
+                    if j < len(headers):
+                        row_dict[headers[j]] = str(cell) if cell is not None else ""
+                rows.append(row_dict)
+                
     added_count = 0
+    updated_count = 0
     
     standard_keys = {
         "name": ["name", "medicine_name", "medicine name", "drug_name", "drug"],
@@ -72,17 +94,18 @@ async def upload_csv(
         "default_instructions": ["instructions", "notes", "directions"]
     }
     
-    # Helper to map row headers to standard fields
-    for row in reader:
+    for row in rows:
         medicine_data = {}
         dynamic_fields = {}
         
         for key, value in row.items():
-            if not key or not value:
+            if not key:
                 continue
             
             key_clean = key.strip().lower()
-            val_clean = value.strip()
+            val_clean = value.strip() if isinstance(value, str) else str(value).strip() if value is not None else ""
+            if not val_clean:
+                continue
             
             mapped = False
             for std_key, aliases in standard_keys.items():
@@ -99,16 +122,28 @@ async def upload_csv(
             
         medicine_data["dynamic_fields"] = dynamic_fields
         
-        # Check if medicine already exists to avoid unique constraint error
         stmt = select(ClinicMedicine).where(ClinicMedicine.name == medicine_data["name"])
         existing = await db.execute(stmt)
-        if not existing.scalar_one_or_none():
+        existing_med = existing.scalar_one_or_none()
+        
+        if existing_med:
+            # Update existing
+            for k, v in medicine_data.items():
+                if k == "dynamic_fields":
+                    curr = existing_med.dynamic_fields or {}
+                    curr.update(v)
+                    existing_med.dynamic_fields = curr
+                else:
+                    setattr(existing_med, k, v)
+            updated_count += 1
+        else:
+            # Create new
             med = ClinicMedicine(**medicine_data)
             db.add(med)
             added_count += 1
             
     await db.commit()
-    return {"status": "success", "medicines_added": added_count}
+    return {"status": "success", "medicines_added": added_count, "medicines_updated": updated_count}
 
 @router.get("/{id}", response_model=ClinicMedicineResponse)
 @require_roles(["SUPER_ADMIN", "DOCTOR", "RECEPTIONIST"])

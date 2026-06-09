@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, Integer, Boolean, DateTime, ForeignKey, Text, Date, Time, Enum as SQLEnum
+from sqlalchemy import Column, String, Integer, Boolean, DateTime, ForeignKey, Text, Date, Time, Enum as SQLEnum, func
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 import enum
@@ -266,3 +266,79 @@ class AdmissionDailyVisit(Base):
     
     admission = relationship("Admission", back_populates="daily_visits")
     doctor = relationship("Doctor")
+
+class ClinicSettings(Base):
+    __tablename__ = "clinic_settings"
+
+    id = Column(Integer, primary_key=True, default=1)
+    clinic_name = Column(String(255), default="Elsan Clinic")
+    logo_url = Column(String(512), nullable=True)
+    email = Column(String(255), default="contact@elsanclinic.com")
+    phone = Column(String(50), default="+91 94441 84977")
+    website = Column(String(255), default="https://elsanclinic.com")
+    physical_address = Column(Text, default="56/1 & 56/2, Perumal Koil Street, Saidapet (West), Chennai – 600 015")
+    google_maps_url = Column(String(1024), nullable=True)
+    working_hours_mon_fri = Column(String(100), default="Mon-Fri: 9 AM - 8 PM")
+    working_hours_sat_sun = Column(String(100), default="Sat-Sun: 10 AM - 4 PM")
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+class ShiftType(str, enum.Enum):
+    MORNING = "MORNING"
+    AFTERNOON = "AFTERNOON"
+    NIGHT = "NIGHT"
+    FULL_DAY = "FULL_DAY"
+
+class Roster(Base):
+    __tablename__ = "rosters"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    date = Column(Date, nullable=False, index=True)
+    shift_type = Column(SQLEnum(ShiftType), nullable=False)
+    start_time = Column(Time, nullable=False)
+    end_time = Column(Time, nullable=False)
+    notes = Column(Text, nullable=True)
+    created_by_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=get_utc_now)
+    updated_at = Column(DateTime(timezone=True), default=get_utc_now, onupdate=get_utc_now)
+    
+    user = relationship("User", foreign_keys=[user_id], backref="rosters")
+    created_by = relationship("User", foreign_keys=[created_by_id])
+
+class LeaveStatus(str, enum.Enum):
+    PENDING = "PENDING"
+    APPROVED = "APPROVED"
+    REJECTED = "REJECTED"
+
+class LeaveRequest(Base):
+    __tablename__ = "leave_requests"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    leave_type = Column(String(100), nullable=False)
+    start_date = Column(Date, nullable=False)
+    end_date = Column(Date, nullable=False)
+    reason = Column(Text, nullable=False)
+    status = Column(SQLEnum(LeaveStatus), default=LeaveStatus.PENDING, index=True)
+    reviewed_by_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="SET NULL"), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=get_utc_now)
+    updated_at = Column(DateTime(timezone=True), default=get_utc_now, onupdate=get_utc_now)
+    
+    user = relationship("User", foreign_keys=[user_id], backref="leave_requests")
+    reviewed_by = relationship("User", foreign_keys=[reviewed_by_id])
+
+class NotificationType(str, enum.Enum):
+    ROSTER = "ROSTER"
+    LEAVE = "LEAVE"
+    ADMIN_MESSAGE = "ADMIN_MESSAGE"
+    SYSTEM_ALERT = "SYSTEM_ALERT"
+
+class Notification(Base):
+    __tablename__ = "notifications"
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    recipient_id = Column(UUID(as_uuid=True), ForeignKey("users.id", ondelete="CASCADE"), nullable=True, index=True) # Null means broadcast
+    title = Column(String(255), nullable=False)
+    message = Column(Text, nullable=False)
+    type = Column(SQLEnum(NotificationType), nullable=False)
+    is_read = Column(Boolean, default=False, index=True)
+    created_at = Column(DateTime(timezone=True), default=get_utc_now)
+    
+    recipient = relationship("User", backref="notifications")

@@ -1,5 +1,5 @@
 from fastapi import HTTPException, status
-from core.security import get_password_hash
+from core.security import get_password_hash, verify_password
 from repositories.staff import StaffRepository
 from schemas.staff import StaffCreate, StaffUpdate
 from models.domain import User, RoleEnum
@@ -54,4 +54,13 @@ class StaffService:
     async def set_active_status(self, user_id: str, is_active: bool) -> User:
         staff = await self.get_staff(user_id)
         staff.is_active = is_active
+        return await self.repo.update(staff)
+
+    async def reset_password(self, user_id: str, admin_user: User, admin_password: str, new_password: str) -> User:
+        staff = await self.get_staff(user_id)
+        
+        if not verify_password(admin_password, admin_user.password_hash):
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid admin password")
+            
+        staff.password_hash = get_password_hash(new_password)
         return await self.repo.update(staff)

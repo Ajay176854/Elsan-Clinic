@@ -28,7 +28,13 @@ export default function WhatsAppPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-800">WhatsApp Management</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-3xl font-bold tracking-tight text-slate-800">WhatsApp Management</h1>
+            <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-full border border-amber-200 shadow-sm flex items-center gap-1.5">
+              <AlertCircle size={12} />
+              Under Development for Meta Verification
+            </span>
+          </div>
           <p className="text-muted-foreground mt-2">Manage Meta API settings, view message logs, and monitor delivery status.</p>
         </div>
         <Button className="bg-green-600 hover:bg-green-700">Test Connection</Button>

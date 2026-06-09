@@ -5,3 +5,10 @@ export { useAppointments, useCreateAppointment, useAssignDoctor, useUpdateAppoin
 export { usePrescriptions, useCreatePrescription } from './use-prescriptions';
 export * from './use-visits';
 export * from './use-admissions';
+export * from './use-staff';
+export * from './use-medicines';
+export * from './use-dashboard';
+export { useSettings, useUpdateSettings, useUploadLogo } from './use-settings';
+export { useRosters, useMyRosters, useCreateRoster, useUpdateRoster, useDeleteRoster } from './use-rosters';
+export { useLeaveRequests, useMyLeaveRequests, useCreateLeaveRequest, useApproveLeaveRequest, useRejectLeaveRequest } from './use-leaves';
+export { useMyNotifications, useSendIndividualNotification, useSendBulkNotification, useMarkNotificationRead, useDeleteNotification } from './use-notifications';

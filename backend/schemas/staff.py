@@ -7,7 +7,11 @@ class StaffCreate(BaseModel):
     email: EmailStr
     phone: str = Field(..., min_length=10, max_length=20)
     password: str = Field(..., min_length=8)
-    role: str = Field(..., pattern="^(SUPER_ADMIN|RECEPTIONIST)$")
+    role: str = Field(..., pattern="^(SUPER_ADMIN|DIRECTOR|RECEPTIONIST|NURSE|PHARMACY|ANALYST)$")
+
+class PasswordResetRequest(BaseModel):
+    admin_password: str = Field(..., min_length=8)
+    new_password: str = Field(..., min_length=8)
 
 class StaffUpdate(BaseModel):
     full_name: Optional[str] = Field(None, min_length=2, max_length=150)

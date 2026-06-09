@@ -35,7 +35,22 @@ class PrescriptionPDFGenerator:
         # Address & Contact
         contact_style = ParagraphStyle('Contact', parent=self.styles['Normal'], alignment=1, textColor=colors.gray)
         elements.append(Paragraph(self.clinic_data.get('address', '123 Health Avenue, Medical District'), contact_style))
-        elements.append(Paragraph(f"Phone: {self.clinic_data.get('phone', '+91 98765 43210')} | Email: {self.clinic_data.get('email', 'contact@elsan.com')}", contact_style))
+        
+        contact_info = f"Phone: {self.clinic_data.get('phone', '+91 98765 43210')} | Email: {self.clinic_data.get('email', 'contact@elsanclinic.com')}"
+        if self.clinic_data.get('website'):
+            contact_info += f" | Web: {self.clinic_data.get('website')}"
+        elements.append(Paragraph(contact_info, contact_style))
+        
+        working_hours = ""
+        if self.clinic_data.get('working_hours_mon_fri'):
+            working_hours += self.clinic_data.get('working_hours_mon_fri')
+        if self.clinic_data.get('working_hours_sat_sun'):
+            if working_hours: working_hours += " | "
+            working_hours += self.clinic_data.get('working_hours_sat_sun')
+            
+        if working_hours:
+            elements.append(Paragraph(working_hours, contact_style))
+        
         elements.append(Spacer(1, 0.3 * inch))
         return elements
 
