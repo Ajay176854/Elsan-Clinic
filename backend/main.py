@@ -21,6 +21,7 @@ from routers.audit_logs import router as audit_router
 from routers.rosters import router as rosters_router
 from routers.leaves import router as leaves_router
 from routers.notifications import router as notifications_router
+from routers.medical_tourism import router as medical_tourism_router
 from services.cron_scheduler import run_scheduler
 
 @asynccontextmanager
@@ -59,6 +60,7 @@ app.include_router(audit_router)
 app.include_router(rosters_router)
 app.include_router(leaves_router)
 app.include_router(notifications_router)
+app.include_router(medical_tourism_router)
 
 @app.get("/")
 def read_root():

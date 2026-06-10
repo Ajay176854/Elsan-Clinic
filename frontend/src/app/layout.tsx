@@ -3,6 +3,7 @@ import { DM_Sans, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 
 import Providers from "../components/Providers";
+import SmoothScrolling from "../components/SmoothScrolling";
 import { cn } from "@/lib/utils";
 
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-dm-sans" });
@@ -26,7 +27,9 @@ export default function RootLayout({
     <html lang="en" className={cn(dmSans.variable, cormorant.variable, "scroll-smooth")}>
       <body className="font-sans antialiased bg-slate-50 text-slate-900 relative">
         <Providers>
-          {children}
+          <SmoothScrolling>
+            {children}
+          </SmoothScrolling>
         </Providers>
       </body>
     </html>

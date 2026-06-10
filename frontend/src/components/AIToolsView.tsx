@@ -105,7 +105,7 @@ function AIChatTool({ title, icon: Icon, color, desc, systemPrompt, initialMessa
 
     try {
       // Assuming backend is running on port 8009
-      const response = await fetch('http://localhost:8009/api/chat', {
+      const response = await fetch('http://127.0.0.1:8009/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'

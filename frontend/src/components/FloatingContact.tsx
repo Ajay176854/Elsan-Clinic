@@ -260,7 +260,7 @@ export default function FloatingContact() {
     
     if (lower.includes('about') || lower.includes('clinic') || lower.includes('where') || lower.includes('location') || lower.includes('முகவரி') || lower.includes('கிளினிக்')) {
       const aboutTxt = language === 'en'
-        ? `${CLINIC_INFO.name} - ${CLINIC_INFO.tagline}.\nEstablished ${CLINIC_INFO.established}.\n\n📍 Address: ${CLINIC_INFO.address}\n📞 Phone: ${CLINIC_INFO.phone}\n✉️ Email: info@elsanclinic.com\n\nWe provide 24/7 emergency care and telemedicine services.`
+        ? `${CLINIC_INFO.name} - ${CLINIC_INFO.tagline}.\nEstablished ${CLINIC_INFO.established}.\n\n📍 Address: ${CLINIC_INFO.address}\n📞 Phone: ${CLINIC_INFO.phone}\n✉️ Email: info@elsanclinic.com\n\n🕒 Timings:\nMon-Fri: 9 AM - 8 PM\nSat-Sun: 10 AM - 4 PM`
         : `${CLINIC_INFO.name} - ${CLINIC_INFO.tagline}.\n\n📍 முகவரி: ${CLINIC_INFO.address}\n📞 தொலைபேசி: ${CLINIC_INFO.phone}\n✉️ மின்னஞ்சல்: info@elsanclinic.com`;
       return { id: msgId, role: 'bot', text: aboutTxt, options: [t.optBook, t.optWhatsApp, t.optMenu] };
     }

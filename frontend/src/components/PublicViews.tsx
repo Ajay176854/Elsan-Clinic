@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight, ArrowRight, Activity, HeartPulse, Stethoscope, Pill, Baby, Users, Microscope, Calendar, Star, Building2, MapPin, User, Phone, BookOpen, Ambulance, BrainCircuit, FileText } from 'lucide-react';
-import { DOCTORS, SERVICES } from '../data';
+import { DOCTORS, SERVICES, CLINIC_INFO } from '../data';
 import type { ViewState } from '../types';
 import { useSettings } from '../hooks';
 
@@ -191,7 +191,7 @@ function HomeView({ onNavigate }: { onNavigate: (v: ViewState) => void }) {
         {[
           { label: 'of Service', value: '20+ Years', icon: Star },
           { label: 'Families Served', value: '10,000+', icon: Users },
-          { label: 'Online Telemedicine', value: '24/7', icon: Stethoscope },
+          { label: 'Mon-Fri / 10 AM-4 PM Sat-Sun', value: '9 AM - 8 PM', icon: Clock },
           { label: 'AI Health Assistant', value: 'Gemini 3.1', icon: Activity },
         ].map((stat, i) => (
           <div key={i} className="bg-white border border-slate-200 rounded-xl p-6 text-center shadow-sm hover:shadow-md transition">
@@ -339,33 +339,7 @@ function AboutView() {
 }
 
 export function DoctorsView() {
-  const [doctors, setDoctors] = React.useState<any[]>([]);
-
-  React.useEffect(() => {
-    const fetchDoctors = async () => {
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8009/api/v1';
-        const res = await fetch(`${apiUrl}/doctors/public`);
-        if (res.ok) {
-          const data = await res.json();
-          const formatted = data.map((d: any) => ({
-            id: d.id,
-            name: d.full_name,
-            role: `${d.experience_years} Years Experience`,
-            qualifications: d.qualification ? d.qualification.split(', ') : [],
-            fellowships: [],
-            phone: d.phone,
-            consultationType: d.consultation_timings || 'In-Clinic',
-            specialties: d.specialization ? d.specialization.split(', ') : []
-          }));
-          setDoctors(formatted);
-        }
-      } catch (e) {
-        console.error("Failed to fetch doctors", e);
-      }
-    };
-    fetchDoctors();
-  }, []);
+  const [isExpanded, setIsExpanded] = React.useState(false);
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
@@ -375,14 +349,9 @@ export function DoctorsView() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {doctors.map((doc, i) => {
-          const defaultImages = [
-            "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80",
-            "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80",
-            "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&q=80",
-            "https://images.unsplash.com/photo-1594824436998-d8bdca9f77f0?w=400&q=80"
-          ];
-          const img = defaultImages[i % defaultImages.length];
+        {(isExpanded ? DOCTORS : DOCTORS.slice(0, 2)).map((doc, i) => {
+          const defaultImage = "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80";
+          const img = doc.imageUrl || defaultImage;
 
           const COLORS = [
             { bg: 'bg-blue-50/60', border: 'border-blue-100', iconBg: 'bg-blue-100', iconText: 'text-blue-600', shadow: 'hover:shadow-blue-500/20' },
@@ -464,6 +433,17 @@ export function DoctorsView() {
           );
         })}
       </div>
+
+      {!isExpanded && DOCTORS.length > 2 && (
+        <div className="text-center mt-10">
+          <button 
+            onClick={() => setIsExpanded(true)} 
+            className="border-2 border-blue-600 text-blue-600 font-bold py-3 px-8 rounded-xl hover:bg-blue-600 hover:text-white transition shadow-sm hover:shadow-md"
+          >
+            View All Doctors
+          </button>
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -488,16 +468,19 @@ const getServiceImage = (title: string) => {
 
 export function ServicesView({ onNavigate }: { onNavigate?: (v: ViewState) => void }) {
   const [selectedService, setSelectedService] = React.useState<any | null>(null);
+  const [isExpanded, setIsExpanded] = React.useState(false);
+
+  const displayedServices = isExpanded ? SERVICES : SERVICES.slice(0, 8);
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8 relative">
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-6xl mx-auto space-y-8 relative px-4 xl:px-0">
       <div className="text-center space-y-4 mb-10">
-        <h1 className="text-3xl md:text-5xl font-bold text-blue-900">Our Medical Services</h1>
-        <p className="text-lg text-slate-600">Comprehensive care under one roof — click any service to view details.</p>
+        <h1 className="text-3xl md:text-5xl font-bold text-blue-900">Centres of Clinical Excellence</h1>
+        <p className="text-lg text-slate-600">World-class specialized care across multiple medical disciplines, driven by research and technology.</p>
       </div>
 
       <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {SERVICES.map((srv, i) => {
+        {displayedServices.map((srv, i) => {
           const Icon = ICON_MAP[srv.iconName] || Activity;
           const COLORS = [
             { bg: 'bg-blue-50/60', border: 'border-blue-100', iconBg: 'bg-blue-100', iconText: 'text-blue-600', hoverFrom: 'from-blue-500', hoverTo: 'to-indigo-600', shadow: 'hover:shadow-blue-500/20' },
@@ -532,6 +515,17 @@ export function ServicesView({ onNavigate }: { onNavigate?: (v: ViewState) => vo
           );
         })}
       </div>
+      
+      {!isExpanded && SERVICES.length > 8 && (
+        <div className="text-center mt-12">
+          <button 
+            onClick={() => setIsExpanded(true)}
+            className="inline-flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold py-3 px-8 rounded-full transition-all border border-blue-200"
+          >
+            View All Specialties <ChevronRight size={20} />
+          </button>
+        </div>
+      )}
       
       {selectedService && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
@@ -612,7 +606,7 @@ export function ContactView() {
             <div>
               <h3 className="font-bold text-slate-800 text-lg">Clinic Address</h3>
               <p className="text-slate-600 mt-1 leading-relaxed whitespace-pre-wrap">
-                {settings?.physical_address || "Elsan Clinic"}
+                {settings?.physical_address || CLINIC_INFO.address}
               </p>
             </div>
           </div>
@@ -620,38 +614,29 @@ export function ContactView() {
             <div className="bg-green-50 text-green-600 p-3 rounded-xl"><Phone size={24}/></div>
             <div>
               <h3 className="font-bold text-slate-800 text-lg">Contact Info</h3>
-              <p className="text-slate-600 mt-1">Phone: {settings?.phone}<br/>Email: {settings?.email}</p>
+              <p className="text-slate-600 mt-1">Phone: {settings?.phone || CLINIC_INFO.phone}<br/>Email: {settings?.email || "info@elsanclinic.com"}</p>
             </div>
           </div>
           <div className="flex items-start gap-4">
             <div className="bg-orange-50 text-orange-600 p-3 rounded-xl"><Calendar size={24}/></div>
             <div>
               <h3 className="font-bold text-slate-800 text-lg">Working Hours</h3>
-              <p className="text-slate-600 mt-1">{settings?.working_hours_mon_fri}<br/>{settings?.working_hours_sat_sun}</p>
+              <p className="text-slate-600 mt-1">{settings?.working_hours_mon_fri || 'Mon - Sat: 8:30 AM - 7:30 PM'}<br/>{settings?.working_hours_sat_sun || 'Sun: 9:00 AM - 1:00 PM'}</p>
             </div>
           </div>
         </div>
         
         <div className="bg-slate-200 rounded-2xl overflow-hidden shadow-inner h-[400px] flex items-center justify-center relative">
-          {settings?.google_maps_url ? (
-            <iframe 
-              src={settings.google_maps_url} 
-              width="100%" 
-              height="100%" 
-              style={{ border: 0 }} 
-              allowFullScreen={true} 
-              loading="lazy" 
-              referrerPolicy="no-referrer-when-downgrade"
-              className="absolute inset-0 w-full h-full"
-            ></iframe>
-          ) : (
-            <>
-              <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=800&q=80" alt="Clinic Location" className="absolute inset-0 w-full h-full object-cover opacity-70" />
-              <div className="relative bg-white/90 backdrop-blur px-6 py-3 rounded-full shadow-lg font-bold text-slate-800 flex items-center gap-2">
-                <MapPin className="text-red-500" /> Map Integration Placeholder
-              </div>
-            </>
-          )}
+          <iframe 
+            src={settings?.google_maps_url || "https://maps.google.com/maps?width=100%25&height=600&hl=en&q=Elsan%20Clinic,%2056/1,%20Perumal%20Koil%20St,%20Saidapet%20(West),%20Chennai,%20Tamil%20Nadu%20600015+(Elsan%20Clinic)&t=&z=16&ie=UTF8&iwloc=B&output=embed"} 
+            width="100%" 
+            height="100%" 
+            style={{ border: 0 }} 
+            allowFullScreen={true} 
+            loading="lazy" 
+            referrerPolicy="no-referrer-when-downgrade"
+            className="absolute inset-0 w-full h-full"
+          ></iframe>
         </div>
       </div>
       )}
@@ -667,7 +652,7 @@ export function BookView() {
   React.useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8009/api/v1';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8009/api/v1';
         const res = await fetch(`${apiUrl}/doctors/public`);
         if (res.ok) {
           const data = await res.json();
@@ -697,7 +682,7 @@ export function BookView() {
     };
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8009/api/v1';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8009/api/v1';
       const res = await fetch(`${apiUrl}/appointments/public`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

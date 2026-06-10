@@ -1,7 +1,10 @@
 "use client";
 
-import { motion } from 'framer-motion';
-import { Phone, HeartPulse, CheckCircle2, ShieldAlert, Plane, Globe, Calculator } from 'lucide-react';
+import { useState, useRef } from 'react';
+
+import { motion, AnimatePresence } from 'framer-motion';
+import { Phone, HeartPulse, CheckCircle2, ShieldAlert, Plane, Globe, Calculator, X, Upload } from 'lucide-react';
+import { useSettings } from '../hooks';
 
 export function HealthPackagesView({ onNavigate }: { onNavigate?: (v: string) => void }) {
   const packages = [
@@ -60,6 +63,9 @@ export function HealthPackagesView({ onNavigate }: { onNavigate?: (v: string) =>
 }
 
 export function EmergencyView() {
+  const { settings } = useSettings();
+  const phoneDisplay = settings?.phone || '94441 84977';
+  const phoneRaw = settings?.phone?.replace(/\s/g, '') || '9444184977';
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-5xl mx-auto space-y-8">
       <div className="bg-red-600 text-white rounded-3xl p-8 md:p-12 shadow-2xl flex flex-col md:flex-row items-center gap-8">
@@ -67,11 +73,11 @@ export function EmergencyView() {
           <ShieldAlert size={80} className="text-white" />
         </div>
         <div className="flex-1 text-center md:text-left space-y-4">
-          <h1 className="text-4xl md:text-5xl font-black">24/7 EMERGENCY & TRAUMA</h1>
+          <h1 className="text-4xl md:text-5xl font-black">EMERGENCY & TRAUMA</h1>
           <p className="text-xl text-red-100">State-of-the-art Level 1 Trauma Center equipped to handle cardiac arrests, strokes, and severe injuries immediately.</p>
           <div className="pt-4 flex flex-col sm:flex-row gap-4">
-            <a href="tel:1066" className="bg-white text-red-600 font-black text-2xl py-4 px-8 rounded-xl shadow-lg hover:scale-105 transition flex items-center justify-center gap-3">
-              <Phone /> CALL 1066
+            <a href={`tel:${phoneRaw}`} className="bg-white text-red-600 font-black text-2xl py-4 px-8 rounded-xl shadow-lg hover:scale-105 transition flex items-center justify-center gap-3">
+              <Phone /> CALL {phoneDisplay}
             </a>
             <button className="bg-red-800 text-white font-bold text-lg py-4 px-8 rounded-xl hover:bg-red-900 transition shadow-lg">
               Ambulance Request
@@ -83,7 +89,7 @@ export function EmergencyView() {
         {[
           { title: "Advanced ACLS Ambulances", desc: "Equipped with ventilators and defibrillators." },
           { title: "Stroke Protocol", desc: "Thrombolysis administered within 60 minutes of arrival." },
-          { title: "Cardiac Emergencies", desc: "24/7 Cath Lab ready for emergency angioplasties." }
+          { title: "Cardiac Emergencies", desc: "Advanced Cath Lab ready for emergency angioplasties." }
         ].map((item, i) => (
           <div key={i} className="bg-red-50 border border-red-100 p-6 rounded-2xl">
             <h3 className="font-bold text-red-900 text-lg mb-2">{item.title}</h3>
@@ -96,6 +102,47 @@ export function EmergencyView() {
 }
 
 export function InternationalPatientsView() {
+  const [showModal, setShowModal] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState({ name: '', phone: '', email: '', country: '', notes: '' });
+  const [file, setFile] = useState<File | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!file) return alert('Please select a report file to upload');
+    setIsSubmitting(true);
+    
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8009/api/v1';
+      const data = new FormData();
+      data.append('patient_name', formData.name);
+      data.append('phone', formData.phone);
+      if (formData.email) data.append('email', formData.email);
+      if (formData.country) data.append('country', formData.country);
+      if (formData.notes) data.append('notes', formData.notes);
+      data.append('file', file);
+
+      const res = await fetch(`${apiUrl}/medical_tourism/reports`, {
+        method: 'POST',
+        body: data
+      });
+
+      if (res.ok) {
+        alert("Thank you! Your medical reports have been securely uploaded. Our senior doctors will review your case and contact you within 24 hours.");
+        setShowModal(false);
+        setFormData({ name: '', phone: '', email: '', country: '', notes: '' });
+        setFile(null);
+      } else {
+        alert("Failed to upload. Please try again or contact via WhatsApp.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error uploading. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-6xl mx-auto space-y-12">
       <div className="text-center space-y-4 mb-10">
@@ -126,15 +173,67 @@ export function InternationalPatientsView() {
           <h2 className="text-3xl font-bold mb-2">Get a Free Cost Estimate</h2>
           <p className="text-slate-400">Share your medical reports and our senior doctors will review your case within 24 hours.</p>
         </div>
-        <button className="bg-teal-500 hover:bg-teal-600 text-white font-bold py-4 px-8 rounded-xl transition whitespace-nowrap">
-          Upload Reports
+        <button 
+          onClick={() => setShowModal(true)}
+          className="bg-teal-500 hover:bg-teal-600 text-white font-bold py-4 px-8 rounded-xl transition whitespace-nowrap shadow-lg shadow-teal-500/30 active:scale-95 flex items-center gap-2"
+        >
+          <Upload size={20} /> Upload Reports
         </button>
       </div>
+
+      <AnimatePresence>
+        {showModal && (
+          <motion.div initial={{opacity: 0}} animate={{opacity: 1}} exit={{opacity: 0}} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
+            <motion.div initial={{scale: 0.95}} animate={{scale: 1}} exit={{scale: 0.95}} className="bg-white rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl">
+              <div className="p-6 border-b border-slate-100 flex justify-between items-center">
+                <h3 className="text-xl font-bold text-slate-800">Upload Medical Reports</h3>
+                <button onClick={() => setShowModal(false)} className="p-2 hover:bg-slate-100 rounded-full transition"><X size={20} className="text-slate-500"/></button>
+              </div>
+              <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <div><input required type="text" placeholder="Full Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-teal-500" /></div>
+                <div className="grid grid-cols-2 gap-4">
+                  <input required type="tel" placeholder="Phone Number" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-teal-500" />
+                  <input type="email" placeholder="Email Address" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-teal-500" />
+                </div>
+                <div><input type="text" placeholder="Country" value={formData.country} onChange={e => setFormData({...formData, country: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-teal-500" /></div>
+                <div><textarea placeholder="Any specific notes or questions?" value={formData.notes} onChange={e => setFormData({...formData, notes: e.target.value})} className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-teal-500 h-24 resize-none" /></div>
+                <div>
+                  <input required type="file" onChange={e => setFile(e.target.files?.[0] || null)} className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100" accept=".pdf,.png,.jpg,.jpeg" />
+                </div>
+                <button disabled={isSubmitting} type="submit" className="w-full py-4 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl mt-4 transition disabled:opacity-50">
+                  {isSubmitting ? "Uploading..." : "Submit Reports"}
+                </button>
+              </form>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
 
 export function HealthLibraryView() {
+  const [weight, setWeight] = useState('');
+  const [height, setHeight] = useState('');
+  const [bmi, setBmi] = useState<number | null>(null);
+
+  const calculateBMI = () => {
+    const w = parseFloat(weight);
+    const h = parseFloat(height) / 100;
+    if (w > 0 && h > 0) {
+      setBmi(w / (h * h));
+    } else {
+      setBmi(null);
+    }
+  };
+
+  const getBMICategory = (val: number) => {
+    if (val < 18.5) return { label: 'Underweight', color: 'text-blue-500' };
+    if (val < 25) return { label: 'Normal weight', color: 'text-green-500' };
+    if (val < 30) return { label: 'Overweight', color: 'text-orange-500' };
+    return { label: 'Obese', color: 'text-red-500' };
+  };
+
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="max-w-6xl mx-auto space-y-10">
       <div className="text-center space-y-4">
@@ -165,9 +264,17 @@ export function HealthLibraryView() {
               <h3 className="font-bold text-lg">BMI Calculator</h3>
             </div>
             <div className="space-y-4">
-              <input type="number" placeholder="Weight (kg)" className="w-full p-3 rounded-lg border outline-none" />
-              <input type="number" placeholder="Height (cm)" className="w-full p-3 rounded-lg border outline-none" />
-              <button className="w-full bg-orange-500 text-white font-bold py-3 rounded-lg hover:bg-orange-600 transition">Calculate BMI</button>
+              <input type="number" placeholder="Weight (kg)" value={weight} onChange={(e) => setWeight(e.target.value)} className="w-full p-3 rounded-lg border outline-none" />
+              <input type="number" placeholder="Height (cm)" value={height} onChange={(e) => setHeight(e.target.value)} className="w-full p-3 rounded-lg border outline-none" />
+              <button onClick={calculateBMI} className="w-full bg-orange-500 text-white font-bold py-3 rounded-lg hover:bg-orange-600 transition">Calculate BMI</button>
+              
+              {bmi !== null && (
+                <div className="mt-4 p-4 bg-white rounded-lg border border-orange-100 text-center animate-in fade-in zoom-in duration-300">
+                  <div className="text-sm text-slate-500 mb-1">Your BMI is</div>
+                  <div className="text-3xl font-black text-slate-800 mb-1">{bmi.toFixed(1)}</div>
+                  <div className={`font-bold ${getBMICategory(bmi).color}`}>{getBMICategory(bmi).label}</div>
+                </div>
+              )}
             </div>
           </div>
         </div>

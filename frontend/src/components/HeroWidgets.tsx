@@ -30,7 +30,7 @@ export default function HeroWidgets() {
           initial={{ x: -50, opacity: 0 }}
           animate={{ x: 0, opacity: 1, y: [0, -10, 0] }}
           transition={{ opacity: { duration: 0.8, delay: 0.2 }, x: { duration: 0.8, delay: 0.2 }, y: { duration: 6, repeat: Infinity, ease: "easeInOut" } }}
-          className="absolute bottom-[35%] md:bottom-[40%] left-4 md:left-6 w-52 md:w-56 bg-white/95 backdrop-blur-xl rounded-2xl p-4 shadow-[0_20px_40px_rgba(0,0,0,0.15)] border border-white/50 z-30 pointer-events-auto"
+          className="absolute bottom-[35%] md:bottom-[40%] left-4 md:left-6 w-52 md:w-56 bg-white rounded-2xl p-4 shadow-[0_20px_40px_rgba(0,0,0,0.15)] border border-slate-100 z-30 pointer-events-auto will-change-transform"
         >
           <div className="flex items-start justify-between mb-3">
             <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
@@ -47,7 +47,7 @@ export default function HeroWidgets() {
           initial={{ x: 50, opacity: 0 }}
           animate={{ x: 0, opacity: 1, y: [0, 10, 0] }}
           transition={{ opacity: { duration: 0.8, delay: 0.4 }, x: { duration: 0.8, delay: 0.4 }, y: { duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 } }}
-          className="absolute bottom-4 right-4 md:bottom-6 md:right-6 w-48 md:w-52 bg-white/95 backdrop-blur-xl rounded-2xl p-4 shadow-[0_20px_40px_rgba(0,0,0,0.15)] border border-white/50 z-30 pointer-events-auto"
+          className="absolute bottom-4 right-4 md:bottom-6 md:right-6 w-48 md:w-52 bg-white rounded-2xl p-4 shadow-[0_20px_40px_rgba(0,0,0,0.15)] border border-slate-100 z-30 pointer-events-auto will-change-transform"
         >
           <div className="flex items-center gap-2 mb-3">
             <div className="flex">
@@ -66,7 +66,7 @@ export default function HeroWidgets() {
           initial={{ y: 50, opacity: 0 }}
           animate={{ y: 0, opacity: 1, y: [0, -8, 0] }}
           transition={{ opacity: { duration: 0.8, delay: 0.6 }, y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 2 } }}
-          className="absolute bottom-4 left-4 md:bottom-6 md:left-6 w-56 md:w-60 bg-white/95 backdrop-blur-xl rounded-2xl p-4 md:p-5 shadow-[0_20px_40px_rgba(0,0,0,0.15)] border border-white/50 z-30 pointer-events-auto"
+          className="absolute bottom-4 left-4 md:bottom-6 md:left-6 w-56 md:w-60 bg-white rounded-2xl p-4 md:p-5 shadow-[0_20px_40px_rgba(0,0,0,0.15)] border border-slate-100 z-30 pointer-events-auto will-change-transform"
         >
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-3">

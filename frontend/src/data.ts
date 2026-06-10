@@ -13,43 +13,47 @@ export const CLINIC_INFO = {
 export const DOCTORS: Doctor[] = [
   {
     id: "dr_elan",
-    name: "DR. N. ELANGESWARAN",
-    role: "CEO & Medical Director · 20+ Years Experience",
-    qualifications: ["MBBS, MD Internal Medicine"],
-    fellowships: ["Fellowship – Practical Cardiology (IMA)", "PG Diploma – Infectious Diseases", "Fellowship in Diabetology – Joslin, USA (Harvard)"],
+    name: "Dr. N.Elangeswaran",
+    role: "CEO & Medical Advisor · 20+ years experience",
+    qualifications: ["MBBS", "M.D.", "Internal Medicine"],
+    fellowships: ["Fellowship in Practical Cardiology (IMA)", "PG Diploma in Infectious Diseases", "Fellowship in Diabetology – Joslin, USA"],
     phone: "9444184977",
     consultationType: "In-Clinic",
-    specialties: ["General Health Care", "Diabetes", "Hypertension", "Skin Disease", "Asthma", "Acute Illness", "Geriatric Care", "Lifestyle Counselling", "Speciality Referrals"]
+    specialties: ["General Health Care", "Diabetes Mellitus", "Systemic Hypertension", "Skin Disease", "Asthma", "Acute Illness Treatment", "Speciality Care & Referrals", "Lifestyle & Preventive Counselling", "Geriatric Care"],
+    imageUrl: "/doctors/doctor_3.jpg"
   },
   {
     id: "dr_meena",
-    name: "DR. E. PANDIYA MEENA",
-    role: "Consultant – Internal Medicine (Online) · Associate Professor",
-    qualifications: ["MBBS, MD, Cardiology Fellow"],
-    fellowships: ["Fellowship – Practical Cardiology (IMA)", "PG Programme – Johns Hopkins University, USA"],
+    name: "Dr. E.Pandiya Meena",
+    role: "Associate Professor & Consultant Internal Medicine",
+    qualifications: ["MBBS", "M.D.", "Cardiology Fellow"],
+    fellowships: ["Fellowship in Practical Cardiology (IMA)", "PG Programme in Cardiology – Johns Hopkins University, USA"],
     phone: "7824051677",
     consultationType: "Online Consultation Only",
-    specialties: ["Cardiac Care", "Infectious Disease", "Geriatric Care", "Evidence-Based Medicine", "Endocrinology", "Telemedicine", "AI in Healthcare", "Emergency Care"]
+    specialties: ["Cardiac Care", "Infectious Disease", "Geriatric Care", "Evidence Based Medicine", "Endocrinological Disorders", "Emergencies", "Telemedicine", "AI in Healthcare"],
+    imageUrl: "/doctors/doctor_2.jpg"
   },
   {
     id: "dr_ramya",
-    name: "DR. E. RAMYASHREE",
-    role: "Consultant Physician – Internal Medicine (Online)",
-    qualifications: ["MBBS, MD General Medicine (SRM 2025), MBA"],
-    fellowships: ["BLS & ACLS – American Board of Cardiology", "Fellowship – Practical Cardiology (IMA)"],
+    name: "Dr. E.Ramyashree",
+    role: "Consultant – Internal Medicine",
+    qualifications: ["MBBS", "M.D.", "MBA", "M.D. General Medicine – SRM Medical College, 2025"],
+    fellowships: ["BLS & ACLS – American Board of Cardiology", "Fellowship in Practical Cardiology (IMA)"],
     phone: "9962663033",
     consultationType: "Online Consultation Only",
-    specialties: ["Cardiac Care", "Infectious Disease", "Geriatric Care", "Evidence-Based Medicine", "Telemedicine", "AI in Healthcare"]
+    specialties: ["Cardiac Care", "Infectious Disease", "Geriatric Care", "Evidence Based Medicine", "Endocrinological Disorders", "Emergencies", "Telemedicine", "AI in Healthcare"],
+    imageUrl: "/doctors/doctor_4.jpg"
   },
   {
     id: "dr_sambath",
-    name: "DR. R. SAMBATH KUMAR",
-    role: "Chief Consultant Paediatrician · DNB Gold Medalist",
-    qualifications: ["MBBS Gold Medalist (Russia)", "MD Paediatrics (Dist.)", "DNB Paediatrics – Sundaram Medical Foundation"],
-    fellowships: ["PGPN – Boston University School of Medicine", "IPPN – Australia", "ICAN RCPCH – London"],
+    name: "Dr. R.Sambath Kumar",
+    role: "Assistant Professor, Registrar & Chief Consultant Paediatrics",
+    qualifications: ["MBBS Gold Medalist, St. Petersburg, Russia", "MD Paediatrics – First Attempt, Distinction", "DNB Paediatrics – Sundaram Medical Foundation"],
+    fellowships: ["PGPN (Boston)", "IPPN (Australia)", "ICAN RCPCH (London)"],
     phone: "8220246025",
     consultationType: "In-Clinic",
-    specialties: ["Vaccinations", "Newborn Care", "Nutrition", "Growth Monitoring", "Behavioural Health", "General Paediatrics", "Seasonal Health"]
+    specialties: ["Vaccinations", "Newborn Care", "Nutrition", "Growth & Development Monitoring", "General Paediatric Care", "Behavioural Health", "Seasonal Health Tips & Preventive Guidance"],
+    imageUrl: "/doctors/doctor_1.jpg"
   }
 ];
 

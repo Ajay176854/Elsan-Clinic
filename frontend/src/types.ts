@@ -9,6 +9,7 @@ export interface Doctor {
   phone: string;
   consultationType: string;
   specialties: string[];
+  imageUrl?: string;
 }
 
 export interface Service {

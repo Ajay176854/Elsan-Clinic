@@ -12,6 +12,8 @@ import AIToolsView from '../components/AIToolsView';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import HeroWidgets from '@/components/HeroWidgets';
 import FloatingContact from '@/components/FloatingContact';
+import { useLenis } from 'lenis/react';
+import { useRouter } from 'next/navigation';
 
 function HeroVideoCarousel({ setActiveTab }: { setActiveTab: (tab: string) => void }) {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -134,7 +136,38 @@ function HeroVideoCarousel({ setActiveTab }: { setActiveTab: (tab: string) => vo
 import { useSettings } from '../hooks';
 
 export default function LandingPage() {
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTabState] = useState('home');
+
+  const lenis = useLenis();
+  const router = useRouter();
+
+  const setActiveTab = (tab: string) => {
+    if (tab === 'book') {
+      router.push('/book');
+      return;
+    }
+
+    setActiveTabState(tab);
+    
+    if (tab === 'home') {
+      if (lenis) {
+        lenis.scrollTo(0, { duration: 1.5 });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      return;
+    }
+    
+    const element = document.getElementById(tab);
+    if (element) {
+      if (lenis) {
+        lenis.scrollTo(element, { offset: -80, duration: 1.5 });
+      } else {
+        const y = element.getBoundingClientRect().top + window.scrollY - 80;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }
+  };
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { settings } = useSettings();
 
@@ -245,11 +278,11 @@ export default function LandingPage() {
       </nav>
 
       {/* Full-Width Hero - Outside main for edge-to-edge */}
-      {activeTab === 'home' && <HeroVideoCarousel setActiveTab={setActiveTab} />}
+      <HeroVideoCarousel setActiveTab={setActiveTab} />
 
       {/* Main Content */}
-      <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8">
-        {activeTab === 'home' && (
+      <main className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-8 space-y-24">
+        <div id="home">
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-12">
 
             {/* Quick Access Bar (Moved below Hero) */}
@@ -283,7 +316,7 @@ export default function LandingPage() {
               {[
                 { label: 'of Service', value: '20+ Years', icon: Star },
                 { label: 'Families Served', value: '10,000+', icon: Users },
-                { label: 'Online Telemedicine', value: '24/7', icon: Stethoscope },
+                { label: 'Mon-Fri / 10 AM-4 PM Sat-Sun', value: '9 AM - 8 PM', icon: Clock },
                 { label: 'Patient Satisfaction', value: '98%', icon: HeartPulse },
               ].map((stat, i) => (
                 <motion.div whileHover={{ y: -8 }} transition={{ type: "spring", stiffness: 300 }} key={i} className="bg-white border border-slate-200 rounded-xl p-6 text-center shadow-sm hover:shadow-xl transition-shadow duration-300 cursor-default">
@@ -307,7 +340,7 @@ export default function LandingPage() {
                 {[
                   { name: 'Ravi K.', condition: 'Diabetes Care', rating: 5, text: 'Dr. Elangeswaran has been managing my diabetes for 8 years. My HbA1c dropped from 9.2 to 6.4. The personalised diet plans and regular follow-ups make all the difference.' },
                   { name: 'Priya S.', condition: 'Paediatrics', rating: 5, text: 'Dr. Sambath Kumar is incredibly gentle with children. My son actually looks forward to his check-ups! The vaccination tracking system is very convenient for busy parents.' },
-                  { name: 'Anand V.', condition: 'Cardiac Care', rating: 5, text: 'After my cardiac episode, the team at Elsan provided exceptional post-MI care. The 24/7 emergency support gave my family real peace of mind during recovery.' },
+                  { name: 'Anand V.', condition: 'Cardiac Care', rating: 5, text: 'After my cardiac episode, the team at Elsan provided exceptional post-MI care. The dedicated emergency support gave my family real peace of mind during recovery.' },
                 ].map((t, i) => (
                   <motion.div key={i} whileHover={{ y: -4 }} className="bg-white rounded-2xl p-6 border border-slate-200 shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col">
                     <Quote size={24} className="text-blue-200 mb-3" />
@@ -365,7 +398,7 @@ export default function LandingPage() {
                       </div>
                       <div>
                         <h4 className="text-lg font-semibold text-slate-900 mb-1">Flexible Hours & Emergency Care</h4>
-                        <p className="text-slate-600 text-sm font-light leading-relaxed">Open 7 days a week with extended evening hours. 24/7 emergency support available with on-call physician coverage.</p>
+                        <p className="text-slate-600 text-sm font-light leading-relaxed">Clinic Hours: Mon-Fri: 9 AM - 8 PM | Sat-Sun: 10 AM - 4 PM. Emergency support available with on-call physician coverage.</p>
                       </div>
                     </div>
                   </div>
@@ -393,122 +426,6 @@ export default function LandingPage() {
               </div>
             </section>
 
-            {/* Centres of Clinical Excellence */}
-            <section className="max-w-6xl mx-auto px-4 xl:px-0 mt-8">
-              <div className="flex flex-col md:flex-row justify-between items-end mb-8">
-                <div>
-                  <h2 className="text-3xl font-serif font-medium text-blue-900 mb-2 border-l-4 border-blue-600 pl-3">Centres of Clinical Excellence</h2>
-                  <p className="text-slate-600 font-sans font-light pl-4 max-w-2xl">World-class specialized care across multiple medical disciplines, driven by research and technology.</p>
-                </div>
-                <button onClick={() => setActiveTab('treatments')} className="hidden md:flex items-center gap-1 text-blue-600 hover:text-blue-800 font-semibold">
-                  View All Specialties <ChevronRight size={18} />
-                </button>
-              </div>
-              <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                {SERVICES.slice(0, 8).map((srv: any, i: number) => {
-                  const ICON_MAP: Record<string, any> = { HeartPulse, Users, Activity, Stethoscope, Pill, Baby: Users, Microscope: Activity, Ambulance, ClipboardList: FileText, PersonStanding: User, Syringe: Activity, BedDouble: Activity };
-                  const Icon = ICON_MAP[srv.iconName] || Activity;
-                  const COLORS = [
-                    { bg: 'bg-blue-50/60', border: 'border-blue-100', iconBg: 'bg-blue-100', iconText: 'text-blue-600', hoverFrom: 'from-blue-500', hoverTo: 'to-indigo-600', shadow: 'hover:shadow-blue-500/20' },
-                    { bg: 'bg-teal-50/60', border: 'border-teal-100', iconBg: 'bg-teal-100', iconText: 'text-teal-600', hoverFrom: 'from-teal-400', hoverTo: 'to-emerald-500', shadow: 'hover:shadow-teal-500/20' },
-                    { bg: 'bg-orange-50/60', border: 'border-orange-100', iconBg: 'bg-orange-100', iconText: 'text-orange-600', hoverFrom: 'from-orange-400', hoverTo: 'to-rose-500', shadow: 'hover:shadow-orange-500/20' },
-                    { bg: 'bg-purple-50/60', border: 'border-purple-100', iconBg: 'bg-purple-100', iconText: 'text-purple-600', hoverFrom: 'from-purple-500', hoverTo: 'to-fuchsia-600', shadow: 'hover:shadow-purple-500/20' },
-                  ];
-                  const theme = COLORS[i % COLORS.length];
-
-                  return (
-                    <button 
-                      key={i} 
-                      onClick={() => setActiveTab('treatments')} 
-                      className={`relative overflow-hidden text-left ${theme.bg} border ${theme.border} rounded-3xl p-6 hover:shadow-xl ${theme.shadow} hover:-translate-y-1 transition-all duration-500 group flex flex-col h-full`}
-                    >
-                      {/* Subtle light orb */}
-                      <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/60 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
-
-                      <div className="relative z-10 flex flex-col h-full w-full">
-                        <div className={`w-14 h-14 ${theme.iconBg} ${theme.iconText} rounded-2xl flex items-center justify-center mb-5 shadow-sm group-hover:scale-110 group-hover:bg-gradient-to-br group-hover:${theme.hoverFrom} group-hover:${theme.hoverTo} group-hover:text-white transition-all duration-500`}>
-                          <Icon size={26} className="transition-transform duration-500 group-hover:-rotate-6" />
-                        </div>
-                        
-                        <h3 className="font-bold text-slate-800 text-[17px] mb-2 group-hover:text-slate-900 transition-colors duration-300 line-clamp-1">{srv.title}</h3>
-                        <p className="text-sm text-slate-600 leading-relaxed font-medium line-clamp-2 flex-1">{srv.description}</p>
-                        
-                        <div className={`mt-5 flex items-center ${theme.iconText} text-xs font-bold uppercase tracking-widest opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-500 ease-out`}>
-                          Explore <ArrowRight size={14} className="ml-1.5 group-hover:translate-x-1 transition-transform duration-300" />
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </section>
-
-            {/* Top Doctors / Medical Experts */}
-            <section className="bg-slate-100 py-16 mt-16 px-4 xl:px-0 rounded-3xl max-w-[95%] mx-auto shadow-inner">
-              <div className="max-w-6xl mx-auto">
-                <div className="text-center mb-12">
-                  <h2 className="text-3xl font-bold text-blue-900 mb-2">Our Medical Experts</h2>
-                  <p className="text-slate-600 max-w-2xl mx-auto">Highly qualified specialists with decades of experience in complex medical procedures.</p>
-                </div>
-                <div className="grid md:grid-cols-3 gap-8">
-                  {[
-                    { name: "Dr. N. Elangeswaran", spec: "Senior Consultant - Internal Medicine", exp: "20+ Years", img: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80", tags: ['Diabetes', 'Cardiology', 'Geriatrics'] },
-                    { name: "Dr. E. Pandiya Meena", spec: "Consultant - Internal Medicine (Online)", exp: "15+ Years", img: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80", tags: ['Cardiac Care', 'Telemedicine', 'Endocrinology'] },
-                    { name: "Dr. R. Sambath Kumar", spec: "Chief Consultant Paediatrician", exp: "18+ Years", img: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=400&q=80", tags: ['Paediatrics', 'Vaccinations', 'Nutrition'] }
-                  ].map((doc, i) => {
-                    const COLORS = [
-                      { bg: 'bg-blue-50/60', border: 'border-blue-100', iconBg: 'bg-blue-100', iconText: 'text-blue-600', shadow: 'hover:shadow-blue-500/20' },
-                      { bg: 'bg-teal-50/60', border: 'border-teal-100', iconBg: 'bg-teal-100', iconText: 'text-teal-600', shadow: 'hover:shadow-teal-500/20' },
-                      { bg: 'bg-orange-50/60', border: 'border-orange-100', iconBg: 'bg-orange-100', iconText: 'text-orange-600', shadow: 'hover:shadow-orange-500/20' },
-                    ];
-                    const theme = COLORS[i % COLORS.length];
-
-                    return (
-                      <div key={i} className={`relative bg-white rounded-[28px] overflow-hidden shadow-sm hover:shadow-xl ${theme.shadow} transition-all duration-500 border border-slate-100 flex flex-col group hover:-translate-y-2`}>
-                        {/* Top Colored Section */}
-                        <div className={`relative pt-8 pb-6 px-6 ${theme.bg} flex flex-col items-center text-center overflow-hidden border-b ${theme.border}`}>
-                          {/* Subtle light orb matching the wedges */}
-                          <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/60 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
-                          
-                          {/* Circular Avatar */}
-                          <div className="relative w-28 h-28 mb-5 z-10">
-                            <img src={doc.img} alt={doc.name} className="w-full h-full object-cover object-top rounded-full border-4 border-white shadow-md group-hover:scale-110 transition-transform duration-500" />
-                            <div className="absolute bottom-1 right-1 bg-green-500 text-white text-[10px] font-bold p-1.5 rounded-full flex items-center shadow-md border-2 border-white">
-                              <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                            </div>
-                          </div>
-                          
-                          <div className="relative z-10">
-                            <h3 className="text-xl font-bold text-slate-800 mb-1 group-hover:text-slate-900 transition-colors">{doc.name}</h3>
-                            <p className={`${theme.iconText} font-semibold text-sm`}>{doc.spec}</p>
-                          </div>
-                        </div>
-
-                        {/* Bottom Information Section */}
-                        <div className="p-6 flex flex-col flex-1 bg-white relative z-20">
-                          <div className="flex flex-wrap justify-center gap-2 mb-6">
-                            {doc.tags.map((tag, ti) => (
-                              <span key={ti} className="bg-slate-50 border border-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">{tag}</span>
-                            ))}
-                          </div>
-                          <div className="flex justify-between items-center text-slate-500 text-sm border-t border-slate-100 pt-5 mt-auto">
-                            <span className={`flex items-center gap-1.5 font-medium ${theme.iconBg} ${theme.iconText} px-3 py-1.5 rounded-lg`}><Clock size={16} /> {doc.exp}</span>
-                            <button onClick={() => setActiveTab('book')} className={`text-slate-600 font-bold hover:${theme.iconText} transition flex items-center gap-1 text-sm group/btn`}>
-                              Book Now <ArrowRight size={16} className={`group-hover/btn:translate-x-1 transition-transform ${theme.iconText}`} />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-                <div className="text-center mt-10">
-                  <button onClick={() => setActiveTab('doctors')} className="border-2 border-blue-600 text-blue-600 font-bold py-3 px-8 rounded-xl hover:bg-blue-600 hover:text-white transition">
-                    View All Doctors
-                  </button>
-                </div>
-              </div>
-            </section>
 
             {/* Advanced Technology / Why Choose Us */}
             <section className="max-w-6xl mx-auto px-4 xl:px-0 py-16 mb-8">
@@ -520,7 +437,7 @@ export default function LandingPage() {
                     {[
                       "High-Resolution 3D MRI & CT Scanning",
                       "Minimally Invasive Endoscopic Suite",
-                      "24/7 Advanced Cath Lab",
+                      "Advanced Cath Lab",
                       "Fully Automated Pathology Lab"
                     ].map((item, i) => (
                       <li key={i} className="flex items-center gap-3 font-semibold text-slate-700">
@@ -537,16 +454,40 @@ export default function LandingPage() {
             </section>
 
           </motion.div>
-        )}
-        {activeTab === 'treatments' && <ServicesView onNavigate={() => setActiveTab('book')} />}
-        {activeTab === 'doctors' && <DoctorsView />}
-        {activeTab === 'contact' && <ContactView />}
-        {activeTab === 'book' && <BookView />}
-        {activeTab === 'aitools' && <AIToolsView />}
-        {activeTab === 'prohealth' && <HealthPackagesView onNavigate={() => setActiveTab('book')} />}
-        {activeTab === 'emergency' && <EmergencyView />}
-        {activeTab === 'nri' && <InternationalPatientsView />}
-        {activeTab === 'library' && <HealthLibraryView />}
+        </div>
+        
+        <div id="treatments" className="scroll-mt-24 pt-10 border-t border-slate-200">
+          <ServicesView onNavigate={() => setActiveTab('book')} />
+        </div>
+        
+        <div id="doctors" className="scroll-mt-24 pt-10 border-t border-slate-200">
+          <DoctorsView />
+        </div>
+        
+
+        <div id="aitools" className="scroll-mt-24 pt-10 border-t border-slate-200">
+          <AIToolsView />
+        </div>
+
+        <div id="prohealth" className="scroll-mt-24 pt-10 border-t border-slate-200">
+          <HealthPackagesView onNavigate={() => setActiveTab('book')} />
+        </div>
+
+        <div id="emergency" className="scroll-mt-24 pt-10 border-t border-slate-200">
+          <EmergencyView />
+        </div>
+
+        <div id="nri" className="scroll-mt-24 pt-10 border-t border-slate-200">
+          <InternationalPatientsView />
+        </div>
+
+        <div id="library" className="scroll-mt-24 pt-10 border-t border-slate-200">
+          <HealthLibraryView />
+        </div>
+
+        <div id="contact" className="scroll-mt-24 pt-10 border-t border-slate-200">
+          <ContactView />
+        </div>
       </main>
 
       <footer className="bg-slate-900 text-slate-300 pt-16 pb-8 mt-12">

@@ -342,3 +342,22 @@ class Notification(Base):
     created_at = Column(DateTime(timezone=True), default=get_utc_now)
     
     recipient = relationship("User", backref="notifications")
+
+class MedicalTourismReportStatus(str, enum.Enum):
+    PENDING = "PENDING"
+    REVIEWED = "REVIEWED"
+    CONTACTED = "CONTACTED"
+
+class MedicalTourismReport(Base):
+    __tablename__ = "medical_tourism_reports"
+    
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    patient_name = Column(String(150), nullable=False)
+    email = Column(String(255), nullable=True)
+    phone = Column(String(50), nullable=False)
+    country = Column(String(100), nullable=True)
+    notes = Column(Text, nullable=True)
+    file_url = Column(String(500), nullable=True)
+    status = Column(SQLEnum(MedicalTourismReportStatus), default=MedicalTourismReportStatus.PENDING)
+    created_at = Column(DateTime(timezone=True), default=get_utc_now)
+

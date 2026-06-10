@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, UserRound, Calendar, FileText, Video, LayoutDashboard, Settings, LogOut, Loader2, BedDouble, Pill, MessageCircle, BarChart3, ShieldAlert, Lock, CalendarDays, CalendarOff, Bell } from "lucide-react";
+import { Users, UserRound, Calendar, FileText, Video, LayoutDashboard, Settings, LogOut, Loader2, BedDouble, Pill, MessageCircle, BarChart3, ShieldAlert, Lock, CalendarDays, CalendarOff, Bell, Plane } from "lucide-react";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from "../../lib/utils";
@@ -17,6 +17,10 @@ const getMenuItems = (role: string, basePath: string) => {
     items.push({ name: "Appointments", href: `${basePath}/appointments`, icon: Calendar });
     items.push({ name: "Patients", href: `${basePath}/patients`, icon: Users });
     items.push({ name: "Inpatients", href: `${basePath}/inpatients`, icon: BedDouble });
+  }
+  
+  if (['SUPER_ADMIN', 'RECEPTIONIST'].includes(role)) {
+    items.push({ name: "Medical Tourism", href: `${basePath}/medical-tourism`, icon: Plane });
   }
   
   if (['SUPER_ADMIN', 'DIRECTOR'].includes(role)) {
