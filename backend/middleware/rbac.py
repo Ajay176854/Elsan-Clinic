@@ -20,10 +20,15 @@ def require_roles(allowed_roles: List[str]):
                     detail="current_user not found in dependencies"
                 )
                 
-            if user.role.value not in allowed_roles:
+            print(f"DEBUG RBAC: user.role={user.role}, type={type(user.role)}, allowed={allowed_roles}")
+            
+            # Handle both Enum and string cases safely
+            role_value = user.role.value if hasattr(user.role, 'value') else user.role
+            
+            if role_value not in allowed_roles:
                 raise HTTPException(
                     status_code=status.HTTP_403_FORBIDDEN,
-                    detail="You do not have permission to perform this action"
+                    detail=f"You do not have permission to perform this action. Your role: {role_value}"
                 )
             
             return await func(*args, **kwargs)

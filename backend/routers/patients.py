@@ -95,12 +95,14 @@ async def get_patient(
     return map_patient_response(patient, assigned_doctor)
 
 @router.post("", response_model=PatientResponse, status_code=status.HTTP_201_CREATED)
-@require_roles(["SUPER_ADMIN", "RECEPTIONIST"])
+@require_roles(["SUPER_ADMIN", "RECEPTIONIST", "NURSE"])
 async def create_patient(
     data: PatientCreate,
     current_user: User = Depends(get_current_user),
     service: PatientService = Depends(get_patient_service)
 ):
+    data.registered_by_id = current_user.id
+    data.registered_by_name = current_user.full_name
     patient = await service.create_patient(data)
     assigned_doctor = await service.get_assigned_doctor(patient.id)
     return map_patient_response(patient, assigned_doctor)

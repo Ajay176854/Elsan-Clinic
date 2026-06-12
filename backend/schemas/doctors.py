@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 class DoctorCreate(BaseModel):
@@ -9,10 +9,15 @@ class DoctorCreate(BaseModel):
     phone: str = Field(..., min_length=10, max_length=20)
     password: str = Field(..., min_length=8)
     # Doctor fields
-    specialization: str
-    qualification: str
-    experience_years: int = Field(..., ge=0)
-    consultation_fee: int = Field(..., ge=0)
+    specialization: Optional[str] = None
+    qualification: Optional[str] = None
+    designation: Optional[str] = None
+    specialties: Optional[List[str]] = None
+    qualifications: Optional[List[str]] = None
+    fellowships: Optional[List[str]] = None
+    consultation_type: Optional[str] = "In-Clinic"
+    experience_years: int = Field(default=0, ge=0)
+    consultation_fee: int = Field(default=500, ge=0)
     consultation_timings: Optional[str] = None
     signature_url: Optional[str] = None
 
@@ -24,6 +29,11 @@ class DoctorUpdate(BaseModel):
     # Doctor fields
     specialization: Optional[str] = None
     qualification: Optional[str] = None
+    designation: Optional[str] = None
+    specialties: Optional[List[str]] = None
+    qualifications: Optional[List[str]] = None
+    fellowships: Optional[List[str]] = None
+    consultation_type: Optional[str] = None
     experience_years: Optional[int] = None
     consultation_fee: Optional[int] = None
     consultation_timings: Optional[str] = None
@@ -35,8 +45,13 @@ class DoctorResponse(BaseModel):
     full_name: str
     email: EmailStr
     phone: str
-    specialization: str
-    qualification: str
+    specialization: Optional[str]
+    qualification: Optional[str]
+    designation: Optional[str]
+    specialties: Optional[List[str]]
+    qualifications: Optional[List[str]]
+    fellowships: Optional[List[str]]
+    consultation_type: Optional[str]
     experience_years: int
     consultation_fee: int
     consultation_timings: Optional[str]

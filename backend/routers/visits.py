@@ -66,7 +66,7 @@ async def get_visit(
     return map_visit_response(visit)
 
 @router.post("", response_model=VisitResponse, status_code=status.HTTP_201_CREATED)
-@require_roles(["SUPER_ADMIN", "RECEPTIONIST", "DOCTOR"])
+@require_roles(["SUPER_ADMIN", "RECEPTIONIST", "DOCTOR", "NURSE"])
 async def create_visit(
     data: VisitCreate,
     current_user: User = Depends(get_current_user),

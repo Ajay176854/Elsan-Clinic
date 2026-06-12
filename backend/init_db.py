@@ -1,6 +1,6 @@
 import asyncio
 from database.database import engine, Base
-from models.domain import User, AuditLog, Prescription, ClinicMedicine, PrescriptionMedicine, Roster, LeaveRequest, Notification, MedicalTourismReport
+from models.domain import User, AuditLog, Prescription, ClinicMedicine, PrescriptionMedicine, Roster, LeaveRequest, Notification
 
 async def init_models():
     async with engine.begin() as conn:

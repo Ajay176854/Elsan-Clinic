@@ -26,6 +26,11 @@ class DoctorService:
         doctor = Doctor(
             specialization=data.specialization,
             qualification=data.qualification,
+            designation=data.designation,
+            specialties=data.specialties or [],
+            qualifications=data.qualifications or [],
+            fellowships=data.fellowships or [],
+            consultation_type=data.consultation_type,
             experience_years=data.experience_years,
             consultation_fee=data.consultation_fee,
             consultation_timings=data.consultation_timings,
@@ -67,6 +72,16 @@ class DoctorService:
             doctor.specialization = data.specialization
         if data.qualification is not None:
             doctor.qualification = data.qualification
+        if data.designation is not None:
+            doctor.designation = data.designation
+        if data.specialties is not None:
+            doctor.specialties = data.specialties
+        if data.qualifications is not None:
+            doctor.qualifications = data.qualifications
+        if data.fellowships is not None:
+            doctor.fellowships = data.fellowships
+        if data.consultation_type is not None:
+            doctor.consultation_type = data.consultation_type
         if data.experience_years is not None:
             doctor.experience_years = data.experience_years
         if data.consultation_fee is not None:

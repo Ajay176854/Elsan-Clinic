@@ -104,4 +104,13 @@ export function useDeleteProfilePic() {
   });
 }
 
+export function useDeleteDoctor() {
+  const queryClient = useQueryClient();
 
+  return useMutation({
+    mutationFn: (id: string) => doctorService.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['doctors'] });
+    },
+  });
+}

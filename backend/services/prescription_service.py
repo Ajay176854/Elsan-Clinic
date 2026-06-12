@@ -45,7 +45,7 @@ class PrescriptionService:
             next_visit=next_visit,
             qr_code_bytes=qr_bytes
         )
-        pdf_bytes = pdf_gen.generate()
+        pdf_bytes = await pdf_gen.generate()
 
         # 4. Upload PDF to Cloudinary
         pdf_filename = f"prescription_{prescription.id}"
@@ -103,13 +103,14 @@ class PrescriptionService:
             next_visit=next_visit,
             qr_code_bytes=qr_bytes
         )
-        pdf_bytes = pdf_gen.generate()
+        pdf_bytes = await pdf_gen.generate()
 
         # Overwrite PDF in Cloudinary using the existing ID
         pdf_filename = prescription.cloudinary_public_id or f"prescription_{prescription.id}"
+            
         upload_result = await upload_bytes(pdf_bytes, "elsan-clinic/prescriptions", pdf_filename, resource_type="raw")
 
-        # Update Database with URLs (in case they changed)
+        # Update Database with URLs
         await self.repo.update_pdf_urls(prescription.id, upload_result["url"], upload_result["public_id"])
         
         return await self.repo.get_by_id(prescription.id)

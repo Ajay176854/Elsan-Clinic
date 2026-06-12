@@ -49,9 +49,9 @@ class DashboardRepository:
 
     async def get_visit_stats(self, group_by: str = "day") -> list[tuple]:
         if group_by == "month":
-            # PostgreSQL specific: date_trunc
+            # For SQLite, we can use strftime('%Y-%m', date)
             stmt = select(
-                func.date_trunc('month', Visit.created_at).label("date"),
+                func.strftime('%Y-%m', Visit.created_at).label("date"),
                 func.count(Visit.id).label("count")
             ).group_by(text("date")).order_by(text("date"))
         else:

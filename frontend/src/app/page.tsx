@@ -7,7 +7,7 @@ import { AnimatePresence } from 'framer-motion';
 import { CLINIC_INFO, SERVICES } from '../data';
 import Link from 'next/link';
 import { DoctorsView, ServicesView, ContactView, BookView } from '../components/PublicViews';
-import { HealthPackagesView, EmergencyView, InternationalPatientsView, HealthLibraryView } from '../components/ApolloViews';
+import { HealthPackagesView, EmergencyView, HealthLibraryView } from '../components/ApolloViews';
 import AIToolsView from '../components/AIToolsView';
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import HeroWidgets from '@/components/HeroWidgets';
@@ -21,8 +21,8 @@ function HeroVideoCarousel({ setActiveTab }: { setActiveTab: (tab: string) => vo
     {
       videoUrl: "/video3.mp4?v=3",
       posterUrl: "https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?w=2000&q=80",
-      title: "Advanced Medical Technology",
-      subtitle: "Equipped with state-of-the-art facilities for precise diagnostics and treatment."
+      title: "Comprehensive Clinic Care",
+      subtitle: "Equipped with modern diagnostic tools to provide precise and personalized treatment plans."
     },
     {
       videoUrl: "/video2.mp4?v=3",
@@ -228,7 +228,6 @@ export default function LandingPage() {
                   { label: 'AI Symptom Checker', tab: 'aitools' },
                   { label: 'ProHealth Packages', tab: 'prohealth' },
                   { label: 'Health Library', tab: 'library' },
-                  { label: 'International Patients', tab: 'nri' },
                 ].map(item => (
                   <button key={item.tab} onClick={() => setActiveTab(item.tab)} className="block w-full text-left text-sm text-slate-600 hover:text-blue-600 hover:bg-blue-50 px-3 py-2.5 rounded-lg transition font-medium">{item.label}</button>
                 ))}
@@ -295,7 +294,6 @@ export default function LandingPage() {
                     { title: 'AI Symptom Checker', icon: BrainCircuit, tab: 'aitools', color: 'bg-teal-500 text-white' },
                     { title: 'ProHealth Check', icon: HeartPulse, tab: 'prohealth', color: 'bg-rose-500 text-white' },
                     { title: 'Emergency', icon: Ambulance, tab: 'emergency', color: 'bg-red-600 text-white' },
-                    { title: 'International', icon: Globe, tab: 'nri', color: 'bg-indigo-500 text-white' },
                   ].map((item, i) => (
                     <button
                       key={i}
@@ -431,14 +429,14 @@ export default function LandingPage() {
             <section className="max-w-6xl mx-auto px-4 xl:px-0 py-16 mb-8">
               <div className="grid md:grid-cols-2 gap-12 items-center">
                 <div>
-                  <h2 className="text-3xl md:text-4xl font-bold text-blue-900 mb-6">Advanced Medical Technology</h2>
-                  <p className="text-slate-600 text-lg mb-8 leading-relaxed">Elsan Clinic is equipped with the latest diagnostic and therapeutic technologies. From high-resolution 3D imaging to minimally invasive surgical suites, we ensure precision, comfort, and safety at every step of your treatment.</p>
+                  <h2 className="text-3xl md:text-4xl font-bold text-blue-900 mb-6">Comprehensive Clinical Expertise</h2>
+                  <p className="text-slate-600 text-lg mb-8 leading-relaxed">Elsan Clinic delivers highly specialized care focused on accurate diagnosis, chronic disease management, and long-term wellness. With our experienced team and patient-first approach, we ensure your family receives the best possible medical attention under one roof.</p>
                   <ul className="space-y-4">
                     {[
-                      "High-Resolution 3D MRI & CT Scanning",
-                      "Minimally Invasive Endoscopic Suite",
-                      "Advanced Cath Lab",
-                      "Fully Automated Pathology Lab"
+                      "Expert Diabetes & Hypertension Management",
+                      "Comprehensive Family & Geriatric Care",
+                      "Dedicated Paediatric & Infant Health",
+                      "Convenient In-Clinic Pharmacy"
                     ].map((item, i) => (
                       <li key={i} className="flex items-center gap-3 font-semibold text-slate-700">
                         <div className="bg-teal-100 p-1 rounded text-teal-600"><CheckCircle2 size={18} /></div> {item}
@@ -447,8 +445,8 @@ export default function LandingPage() {
                   </ul>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <img src="https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400&q=80" alt="Hospital Room" className="rounded-2xl shadow-md w-full h-48 md:h-64 object-cover" />
-                  <img src="https://images.unsplash.com/photo-1581594693702-fbdc51b2763b?w=400&q=80" alt="Advanced Imaging Tech" className="rounded-2xl shadow-md w-full h-48 md:h-64 object-cover mt-8" />
+                  <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80" alt="Doctor Consultation" className="rounded-2xl shadow-md w-full h-48 md:h-64 object-cover" />
+                  <img src="https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=400&q=80" alt="Modern Clinic" className="rounded-2xl shadow-md w-full h-48 md:h-64 object-cover mt-8" />
                 </div>
               </div>
             </section>
@@ -475,10 +473,6 @@ export default function LandingPage() {
 
         <div id="emergency" className="scroll-mt-24 pt-10 border-t border-slate-200">
           <EmergencyView />
-        </div>
-
-        <div id="nri" className="scroll-mt-24 pt-10 border-t border-slate-200">
-          <InternationalPatientsView />
         </div>
 
         <div id="library" className="scroll-mt-24 pt-10 border-t border-slate-200">

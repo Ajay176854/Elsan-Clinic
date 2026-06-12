@@ -21,7 +21,7 @@ class PatientCreate(PatientBase):
     doctor_id: Optional[str] = None  # To assign a doctor upon registration
     appointment_date: Optional[date] = None
     appointment_time: Optional[time] = None
-    registered_by_id: Optional[str] = None
+    registered_by_id: Optional[uuid.UUID] = None
     registered_by_name: Optional[str] = None
 
 class PatientUpdate(BaseModel):

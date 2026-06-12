@@ -37,8 +37,8 @@ function HeroVideoCarousel({ onNavigate }: { onNavigate: (v: ViewState) => void 
     {
       videoUrl: "/video3.mp4?v=3",
       posterUrl: "https://images.unsplash.com/photo-1538108149393-cebb47cbdc12?w=2000&q=80",
-      title: "Advanced Medical Technology",
-      subtitle: "Equipped with state-of-the-art facilities for precise diagnostics and treatment."
+      title: "Comprehensive Clinic Care",
+      subtitle: "Equipped with modern diagnostic tools to provide precise and personalized treatment plans."
     },
     {
       videoUrl: "/video2.mp4?v=3",
@@ -340,6 +340,25 @@ function AboutView() {
 
 export function DoctorsView() {
   const [isExpanded, setIsExpanded] = React.useState(false);
+  const [doctors, setDoctors] = React.useState<any[]>([]);
+
+  React.useEffect(() => {
+    const fetchDoctors = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1';
+        const res = await fetch(`${apiUrl}/doctors/public`);
+        if (res.ok) {
+          const data = await res.json();
+          setDoctors(data);
+        }
+      } catch (e) {
+        console.error("Failed to fetch doctors", e);
+      }
+    };
+    fetchDoctors();
+  }, []);
+
+  const displayDoctors = doctors.length > 0 ? doctors : DOCTORS;
 
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
@@ -349,9 +368,9 @@ export function DoctorsView() {
       </div>
 
       <div className="grid md:grid-cols-2 gap-6">
-        {(isExpanded ? DOCTORS : DOCTORS.slice(0, 2)).map((doc, i) => {
+        {(isExpanded ? displayDoctors : displayDoctors.slice(0, 2)).map((doc, i) => {
           const defaultImage = "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80";
-          const img = doc.imageUrl || defaultImage;
+          const img = doc.profile_pic_url || doc.imageUrl || defaultImage;
 
           const COLORS = [
             { bg: 'bg-blue-50/60', border: 'border-blue-100', iconBg: 'bg-blue-100', iconText: 'text-blue-600', shadow: 'hover:shadow-blue-500/20' },
@@ -370,8 +389,8 @@ export function DoctorsView() {
                 {/* Consultation Type Badges Overlay */}
                 <div className="absolute top-4 left-4 flex flex-col gap-2">
                   <span className={`inline-flex items-center gap-1.5 bg-white/60 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-bold ${theme.iconText} border border-white shadow-sm`}>
-                    {doc.consultationType.includes('Online') ? <Activity size={12} /> : <Building2 size={12} />}
-                    {doc.consultationType}
+                    {(doc.consultation_type || doc.consultationType || '').includes('Online') ? <Activity size={12} /> : <Building2 size={12} />}
+                    {doc.consultation_type || doc.consultationType}
                   </span>
                 </div>
 
@@ -384,8 +403,8 @@ export function DoctorsView() {
                 </div>
                 
                 <div className="relative z-10">
-                  <h3 className="text-xl md:text-2xl font-bold text-slate-800 mb-1 group-hover:text-slate-900 transition-colors">{doc.name}</h3>
-                  <p className={`${theme.iconText} font-semibold text-sm`}>{doc.role}</p>
+                  <h3 className="text-xl md:text-2xl font-bold text-slate-800 mb-1 group-hover:text-slate-900 transition-colors">{doc.full_name || doc.name}</h3>
+                  <p className={`${theme.iconText} font-semibold text-sm`}>{doc.designation || doc.role}</p>
                 </div>
               </div>
 
@@ -394,13 +413,13 @@ export function DoctorsView() {
                 <div>
                   <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2.5">Qualifications</h3>
                   <ul className="space-y-1.5 text-sm text-slate-700 font-medium">
-                    {doc.qualifications.map((q: string, idx: number) => (
+                    {(doc.qualifications || []).map((q: string, idx: number) => (
                       <li key={`q-${idx}`} className="flex items-start gap-2">
                         <div className={`w-1.5 h-1.5 rounded-full ${theme.iconBg} mt-1.5 shrink-0`} />
                         {q}
                       </li>
                     ))}
-                    {doc.fellowships.map((f: string, idx: number) => (
+                    {(doc.fellowships || []).map((f: string, idx: number) => (
                       <li key={`f-${idx}`} className="flex items-start gap-2 text-slate-500">
                         <div className={`w-1.5 h-1.5 rounded-full bg-slate-300 mt-1.5 shrink-0`} />
                         {f}
@@ -412,7 +431,7 @@ export function DoctorsView() {
                 <div className="pt-4 border-t border-slate-100 flex-1">
                   <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2.5">Specialises In</h3>
                   <div className="flex flex-wrap gap-2">
-                    {doc.specialties.map((spec: string, idx: number) => (
+                    {(doc.specialties || []).map((spec: string, idx: number) => (
                       <span key={idx} className="bg-slate-50 border border-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
                         {spec}
                       </span>
@@ -434,7 +453,7 @@ export function DoctorsView() {
         })}
       </div>
 
-      {!isExpanded && DOCTORS.length > 2 && (
+      {!isExpanded && displayDoctors.length > 2 && (
         <div className="text-center mt-10">
           <button 
             onClick={() => setIsExpanded(true)} 
@@ -652,7 +671,7 @@ export function BookView() {
   React.useEffect(() => {
     const fetchDoctors = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8009/api/v1';
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1';
         const res = await fetch(`${apiUrl}/doctors/public`);
         if (res.ok) {
           const data = await res.json();
@@ -682,7 +701,7 @@ export function BookView() {
     };
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8009/api/v1';
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000/api/v1';
       const res = await fetch(`${apiUrl}/appointments/public`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

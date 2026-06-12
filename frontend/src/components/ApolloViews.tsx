@@ -73,8 +73,8 @@ export function EmergencyView() {
           <ShieldAlert size={80} className="text-white" />
         </div>
         <div className="flex-1 text-center md:text-left space-y-4">
-          <h1 className="text-4xl md:text-5xl font-black">EMERGENCY & TRAUMA</h1>
-          <p className="text-xl text-red-100">State-of-the-art Level 1 Trauma Center equipped to handle cardiac arrests, strokes, and severe injuries immediately.</p>
+          <h1 className="text-4xl md:text-5xl font-black">URGENT CARE</h1>
+          <p className="text-xl text-red-100">Equipped for rapid response to acute illnesses, minor trauma, and immediate stabilizations.</p>
           <div className="pt-4 flex flex-col sm:flex-row gap-4">
             <a href={`tel:${phoneRaw}`} className="bg-white text-red-600 font-black text-2xl py-4 px-8 rounded-xl shadow-lg hover:scale-105 transition flex items-center justify-center gap-3">
               <Phone /> CALL {phoneDisplay}
@@ -87,9 +87,9 @@ export function EmergencyView() {
       </div>
       <div className="grid md:grid-cols-3 gap-6 pt-8">
         {[
-          { title: "Advanced ACLS Ambulances", desc: "Equipped with ventilators and defibrillators." },
-          { title: "Stroke Protocol", desc: "Thrombolysis administered within 60 minutes of arrival." },
-          { title: "Cardiac Emergencies", desc: "Advanced Cath Lab ready for emergency angioplasties." }
+          { title: "First Aid & Minor Trauma", desc: "Wound care, suturing, and immediate stabilization." },
+          { title: "Acute Asthma & Respiratory", desc: "Nebulization and oxygen support available." },
+          { title: "Cardiac Monitoring", desc: "Immediate ECG and first-line medical management." }
         ].map((item, i) => (
           <div key={i} className="bg-red-50 border border-red-100 p-6 rounded-2xl">
             <h3 className="font-bold text-red-900 text-lg mb-2">{item.title}</h3>

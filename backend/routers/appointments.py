@@ -162,7 +162,13 @@ async def assign_doctor_to_appointment(
     if not doctor_id:
         raise HTTPException(status_code=400, detail="Doctor ID is required")
         
-    result = await db.execute(select(Appointment).where(Appointment.id == id))
+    import uuid
+    try:
+        appt_id = uuid.UUID(id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid appointment ID format")
+        
+    result = await db.execute(select(Appointment).where(Appointment.id == appt_id))
     appointment = result.scalar_one_or_none()
     if not appointment:
         raise HTTPException(status_code=404, detail="Appointment not found")
@@ -188,7 +194,13 @@ async def update_appointment_status(
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid status value")
         
-    result = await db.execute(select(Appointment).where(Appointment.id == id))
+    import uuid
+    try:
+        appt_id = uuid.UUID(id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Invalid appointment ID format")
+        
+    result = await db.execute(select(Appointment).where(Appointment.id == appt_id))
     appointment = result.scalar_one_or_none()
     if not appointment:
         raise HTTPException(status_code=404, detail="Appointment not found")

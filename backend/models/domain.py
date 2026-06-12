@@ -4,6 +4,7 @@ from sqlalchemy import Column, String, Integer, Boolean, DateTime, ForeignKey, T
 from sqlalchemy.dialects.postgresql import UUID, JSONB
 from sqlalchemy.orm import relationship
 import enum
+from sqlalchemy import JSON
 
 from database.database import Base
 
@@ -39,10 +40,15 @@ class Doctor(Base):
     
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"), unique=True, nullable=False, index=True)
-    specialization = Column(String(150), nullable=False)
-    qualification = Column(String(150), nullable=False)
-    experience_years = Column(Integer, nullable=False)
-    consultation_fee = Column(Integer, nullable=False)
+    specialization = Column(String(150), nullable=True)
+    qualification = Column(String(150), nullable=True)
+    designation = Column(String(255), nullable=True)
+    specialties = Column(JSON, nullable=True, default=list)
+    qualifications = Column(JSON, nullable=True, default=list)
+    fellowships = Column(JSON, nullable=True, default=list)
+    consultation_type = Column(String(50), default="In-Clinic")
+    experience_years = Column(Integer, nullable=False, default=0)
+    consultation_fee = Column(Integer, nullable=False, default=500)
     signature_url = Column(String(500), nullable=True)
     signature_public_id = Column(String(255), nullable=True)
     profile_pic_url = Column(String(500), nullable=True)
@@ -342,22 +348,4 @@ class Notification(Base):
     created_at = Column(DateTime(timezone=True), default=get_utc_now)
     
     recipient = relationship("User", backref="notifications")
-
-class MedicalTourismReportStatus(str, enum.Enum):
-    PENDING = "PENDING"
-    REVIEWED = "REVIEWED"
-    CONTACTED = "CONTACTED"
-
-class MedicalTourismReport(Base):
-    __tablename__ = "medical_tourism_reports"
-    
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    patient_name = Column(String(150), nullable=False)
-    email = Column(String(255), nullable=True)
-    phone = Column(String(50), nullable=False)
-    country = Column(String(100), nullable=True)
-    notes = Column(Text, nullable=True)
-    file_url = Column(String(500), nullable=True)
-    status = Column(SQLEnum(MedicalTourismReportStatus), default=MedicalTourismReportStatus.PENDING)
-    created_at = Column(DateTime(timezone=True), default=get_utc_now)
 

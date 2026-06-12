@@ -57,6 +57,14 @@ async def create_prescription(
         if not doctor:
             raise HTTPException(status_code=400, detail="Doctor profile not found")
         data.doctor_id = doctor.id
+    else:
+        # For SUPER_ADMIN/RECEPTIONIST, if a dummy doctor ID is sent, use the first available doctor
+        if str(data.doctor_id) == "00000000-0000-0000-0000-000000000000":
+            doctor_res = await db.execute(select(Doctor).limit(1))
+            doctor = doctor_res.scalar_one_or_none()
+            if not doctor:
+                raise HTTPException(status_code=400, detail="No doctor available in the system")
+            data.doctor_id = doctor.id
 
     # Fetching patient for the PDF
     patient_res = await db.execute(select(Patient).where(Patient.id == data.patient_id))
@@ -75,7 +83,7 @@ async def create_prescription(
         "address": settings.physical_address,
         "email": settings.email,
         "website": settings.website,
-        "logo_url": settings.logo_url,
+        "logo_url": settings.logo_url or "https://cdn-icons-png.flaticon.com/512/2966/2966327.png",
         "working_hours_mon_fri": settings.working_hours_mon_fri,
         "working_hours_sat_sun": settings.working_hours_sat_sun
         # explicit exclusion: google_maps_url is omitted for prescriptions
@@ -174,6 +182,35 @@ async def download_prescription(
     await db.commit()
 
     return {"download_url": presc.pdf_url}
+
+@router.get("/{id}/pdf")
+async def download_prescription_pdf(
+    id: uuid.UUID,
+    service: PrescriptionService = Depends(get_prescription_service)
+):
+    presc = await service.get_prescription(id)
+    if not presc or not presc.pdf_url:
+        raise HTTPException(status_code=404, detail="Prescription PDF not found")
+        
+    import urllib.request
+    from fastapi.responses import StreamingResponse
+    import io
+    
+    try:
+        req = urllib.request.Request(presc.pdf_url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            pdf_bytes = resp.read()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch PDF: {str(e)}")
+        
+    return StreamingResponse(
+        io.BytesIO(pdf_bytes), 
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": "attachment; filename=Elsan_Clinic_Prescription.pdf"
+        }
+    )
+
 
 @router.get("/{id}/signed-url")
 @require_roles(["SUPER_ADMIN", "DOCTOR", "RECEPTIONIST"])
