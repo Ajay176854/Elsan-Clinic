@@ -204,6 +204,11 @@ export default function PatientSearch() {
       <PatientRegistrationModal 
         isOpen={isRegModalOpen} 
         onClose={() => setIsRegModalOpen(false)} 
+        onSelectExistingPatient={(patientId) => {
+          setIsRegModalOpen(false);
+          setSelectedPatientId(patientId);
+          setIsVisitModalOpen(true);
+        }}
       />
       
       <PatientDetailsModal 
@@ -215,7 +220,10 @@ export default function PatientSearch() {
       <VisitCreationModal 
         patientId={selectedPatientId} 
         isOpen={isVisitModalOpen} 
-        onClose={() => setIsVisitModalOpen(false)} 
+        onClose={() => {
+          setIsVisitModalOpen(false);
+          setSelectedPatientId(null);
+        }} 
       />
     </div>
   );

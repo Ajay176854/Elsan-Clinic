@@ -23,6 +23,11 @@ export interface DoctorApiResponse {
   consultation_timings?: string;
   signature_url?: string;
   profile_pic_url?: string;
+  designation?: string;
+  specialties?: string[];
+  qualifications?: string[];
+  fellowships?: string[];
+  consultation_type?: string;
   phone: string;
   is_active: boolean;
   status?: boolean;

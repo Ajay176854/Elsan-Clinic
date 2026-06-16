@@ -136,32 +136,32 @@ function AIChatTool({ title, icon: Icon, color, desc, systemPrompt, initialMessa
   const focusClass = color === 'green' ? 'focus:border-green-500 focus:ring-green-500' : color === 'indigo' ? 'focus:border-indigo-500 focus:ring-indigo-500' : 'focus:border-blue-500 focus:ring-blue-500';
 
   return (
-    <div className="space-y-6 flex flex-col h-[600px]">
+    <div className="space-y-6 flex flex-col h-[500px] md:h-[600px]">
       <div className="border-b border-slate-100 pb-4 shrink-0">
-        <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-800 flex items-center gap-2">
           <Icon className={colorClass}/> {title}
         </h2>
-        <p className="text-slate-600 mt-1">{desc}</p>
+        <p className="text-slate-600 text-xs sm:text-sm mt-1">{desc}</p>
       </div>
       
       <div className="flex-1 overflow-y-auto space-y-4 pr-2 pb-4">
         {messages.map((msg, i) => (
-          <div key={i} className={`flex gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'user' ? 'bg-slate-200 text-slate-700' : bgClass + ' text-white'}`}>
+          <div key={i} className={`flex gap-2 sm:gap-4 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
+            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 text-xs sm:text-sm ${msg.role === 'user' ? 'bg-slate-200 text-slate-700' : bgClass + ' text-white'}`}>
               {msg.role === 'user' ? 'U' : 'AI'}
             </div>
-            <div className={`max-w-[80%] p-4 rounded-xl shadow-sm border ${msg.role === 'user' ? 'bg-slate-100 border-slate-200 rounded-tr-none' : 'bg-white border-slate-200 rounded-tl-none'}`}>
-              <p className="text-slate-800 whitespace-pre-wrap leading-relaxed" dangerouslySetInnerHTML={{__html: msg.content.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}}></p>
+            <div className={`max-w-[85%] p-3 sm:p-4 rounded-xl shadow-sm border ${msg.role === 'user' ? 'bg-slate-100 border-slate-200 rounded-tr-none' : 'bg-white border-slate-200 rounded-tl-none'}`}>
+              <p className="text-slate-800 text-xs sm:text-sm whitespace-pre-wrap leading-relaxed" dangerouslySetInnerHTML={{__html: msg.content.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')}}></p>
             </div>
           </div>
         ))}
         {isLoading && (
-          <div className="flex gap-4">
-             <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${bgClass} text-white`}>AI</div>
-             <div className="max-w-[80%] p-4 rounded-xl shadow-sm border bg-white border-slate-200 rounded-tl-none flex items-center gap-2">
-                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></div>
-                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
+          <div className="flex gap-2 sm:gap-4">
+             <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shrink-0 text-xs sm:text-sm ${bgClass} text-white`}>AI</div>
+             <div className="max-w-[85%] p-3 sm:p-4 rounded-xl shadow-sm border bg-white border-slate-200 rounded-tl-none flex items-center gap-2">
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-slate-400 rounded-full animate-bounce"></div>
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+                <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-slate-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
              </div>
           </div>
         )}

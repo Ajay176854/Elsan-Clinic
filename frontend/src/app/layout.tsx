@@ -24,8 +24,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={cn(dmSans.variable, cormorant.variable, "scroll-smooth")}>
-      <body className="font-sans antialiased bg-slate-50 text-slate-900 relative">
+    <html lang="en" suppressHydrationWarning className={cn(dmSans.variable, cormorant.variable, "scroll-smooth")}>
+      <body suppressHydrationWarning className="font-sans antialiased bg-slate-50 text-slate-900 relative">
         <Providers>
           <SmoothScrolling>
             {children}

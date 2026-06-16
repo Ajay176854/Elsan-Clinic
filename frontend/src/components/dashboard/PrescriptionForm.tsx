@@ -138,7 +138,8 @@ export default function PrescriptionForm({ patientId, visitId }: { patientId?: s
       };
       
       const res = await prescriptionApi.create(prescData);
-      setPdfUrl(res.pdf_url);
+      const baseUrl = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1').replace(/\/$/, "");
+      setPdfUrl(`${baseUrl}/prescriptions/${res.id}/pdf`);
       
       // Update activeVisitId in case the backend created a new one
       if (!activeVisitId && res.visit_id) {

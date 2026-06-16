@@ -30,6 +30,18 @@ class PatientService:
         return await self.repository.search_patients(query)
 
     async def create_patient(self, data: PatientCreate):
+        # Check if patient with this phone number already exists
+        from sqlalchemy.future import select
+        existing = await self.db.execute(
+            select(Patient).filter(Patient.phone == data.phone)
+        )
+        existing_patient = existing.scalars().first()
+        if existing_patient:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Patient with phone number {data.phone} already exists (Code: {existing_patient.patient_code}, Name: {existing_patient.full_name}). Please create a visit instead."
+            )
+
         patient_data = data.model_dump(exclude={"doctor_id", "appointment_date", "appointment_time"}, exclude_unset=True)
         # Generate patient code
         patient_data["patient_code"] = f"ELS-{str(uuid.uuid4())[:8].upper()}"

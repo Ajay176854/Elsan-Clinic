@@ -29,6 +29,11 @@ export function DoctorFormModal({ isOpen, onClose, doctor, onSuccess }: DoctorFo
     experience_years: 0,
     consultation_fee: 0,
     consultation_timings: '',
+    designation: '',
+    qualifications_csv: '',
+    specialties_csv: '',
+    fellowships_csv: '',
+    consultation_type: 'In-Clinic',
   });
 
   const [errorMsg, setErrorMsg] = useState('');
@@ -39,12 +44,17 @@ export function DoctorFormModal({ isOpen, onClose, doctor, onSuccess }: DoctorFo
         full_name: doctor.full_name || doctor.name || '',
         email: doctor.email || '',
         phone: doctor.phone || '',
-        password: '', // not editable/visible
+        password: '', // not editable
         specialization: doctor.specialization || doctor.spec || '',
         qualification: doctor.qualification || '',
         experience_years: doctor.experience_years || 0,
         consultation_fee: doctor.consultation_fee || 0,
         consultation_timings: doctor.consultation_timings || '',
+        designation: doctor.designation || '',
+        qualifications_csv: (doctor.qualifications || []).join(', '),
+        specialties_csv: (doctor.specialties || []).join(', '),
+        fellowships_csv: (doctor.fellowships || []).join(', '),
+        consultation_type: doctor.consultation_type || 'In-Clinic',
       });
     } else {
       setFormData({
@@ -57,12 +67,17 @@ export function DoctorFormModal({ isOpen, onClose, doctor, onSuccess }: DoctorFo
         experience_years: 0,
         consultation_fee: 0,
         consultation_timings: '',
+        designation: '',
+        qualifications_csv: '',
+        specialties_csv: '',
+        fellowships_csv: '',
+        consultation_type: 'In-Clinic',
       });
     }
     setErrorMsg('');
   }, [doctor, isOpen]);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -73,6 +88,8 @@ export function DoctorFormModal({ isOpen, onClose, doctor, onSuccess }: DoctorFo
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
+
+    const parseCSV = (csv: string) => csv.split(',').map(s => s.trim()).filter(Boolean);
 
     try {
       if (doctor) {
@@ -86,6 +103,11 @@ export function DoctorFormModal({ isOpen, onClose, doctor, onSuccess }: DoctorFo
           experience_years: formData.experience_years,
           consultation_fee: formData.consultation_fee,
           consultation_timings: formData.consultation_timings || undefined,
+          designation: formData.designation || undefined,
+          qualifications: parseCSV(formData.qualifications_csv),
+          specialties: parseCSV(formData.specialties_csv),
+          fellowships: parseCSV(formData.fellowships_csv),
+          consultation_type: formData.consultation_type,
         };
         const updated = await updateDoctor({ id: doctor.id, data: payload });
         if (onSuccess) onSuccess(updated);
@@ -106,6 +128,11 @@ export function DoctorFormModal({ isOpen, onClose, doctor, onSuccess }: DoctorFo
           experience_years: formData.experience_years,
           consultation_fee: formData.consultation_fee,
           consultation_timings: formData.consultation_timings || undefined,
+          designation: formData.designation || undefined,
+          qualifications: parseCSV(formData.qualifications_csv),
+          specialties: parseCSV(formData.specialties_csv),
+          fellowships: parseCSV(formData.fellowships_csv),
+          consultation_type: formData.consultation_type,
         };
         await createDoctor(payload);
         onClose();
@@ -118,14 +145,14 @@ export function DoctorFormModal({ isOpen, onClose, doctor, onSuccess }: DoctorFo
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl bg-white rounded-2xl border border-slate-100 shadow-xl overflow-hidden p-0">
-        <DialogHeader className="bg-slate-50 border-b border-slate-100 p-6">
+      <DialogContent className="max-w-2xl bg-white rounded-2xl border border-slate-100 shadow-xl overflow-hidden p-0 max-h-[90vh] flex flex-col">
+        <DialogHeader className="bg-slate-50 border-b border-slate-100 p-6 shrink-0">
           <DialogTitle className="text-xl font-bold text-slate-800">
             {doctor ? 'Edit Doctor Profile' : 'Register New Doctor'}
           </DialogTitle>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-6 space-y-5">
           {errorMsg && (
             <div className="bg-red-50 text-red-700 text-sm p-3 rounded-lg border border-red-100">
               {errorMsg}
@@ -192,7 +219,7 @@ export function DoctorFormModal({ isOpen, onClose, doctor, onSuccess }: DoctorFo
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label htmlFor="specialization" className="text-slate-700 font-medium">Specialization *</Label>
+              <Label htmlFor="specialization" className="text-slate-700 font-medium">Specialization (Primary) *</Label>
               <Input
                 id="specialization"
                 name="specialization"
@@ -204,7 +231,7 @@ export function DoctorFormModal({ isOpen, onClose, doctor, onSuccess }: DoctorFo
               />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="qualification" className="text-slate-700 font-medium">Qualification *</Label>
+              <Label htmlFor="qualification" className="text-slate-700 font-medium">Qualification (Short) *</Label>
               <Input
                 id="qualification"
                 name="qualification"
@@ -214,6 +241,34 @@ export function DoctorFormModal({ isOpen, onClose, doctor, onSuccess }: DoctorFo
                 placeholder="e.g. MBBS, MD"
                 className="bg-slate-50/50 border-slate-200 focus:bg-white transition-colors"
               />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <Label htmlFor="designation" className="text-slate-700 font-medium">Designation</Label>
+              <Input
+                id="designation"
+                name="designation"
+                value={formData.designation}
+                onChange={handleChange}
+                placeholder="e.g. CEO & Medical Advisor"
+                className="bg-slate-50/50 border-slate-200 focus:bg-white transition-colors"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="consultation_type" className="text-slate-700 font-medium">Consultation Type</Label>
+              <select
+                id="consultation_type"
+                name="consultation_type"
+                value={formData.consultation_type}
+                onChange={handleChange}
+                className="w-full h-10 px-3 bg-slate-50/50 border border-slate-200 rounded-md focus:bg-white outline-none focus:ring-2 focus:ring-blue-500 transition-colors text-sm text-slate-700"
+              >
+                <option value="In-Clinic">In-Clinic</option>
+                <option value="Online Consultation Only">Online Consultation Only</option>
+                <option value="In-Clinic & Online">In-Clinic & Online</option>
+              </select>
             </div>
           </div>
 
@@ -258,7 +313,43 @@ export function DoctorFormModal({ isOpen, onClose, doctor, onSuccess }: DoctorFo
             />
           </div>
 
-          <DialogFooter className="bg-slate-50 border-t border-slate-100 p-6 flex gap-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="qualifications_csv" className="text-slate-700 font-medium">Qualifications List (comma-separated)</Label>
+            <Input
+              id="qualifications_csv"
+              name="qualifications_csv"
+              value={formData.qualifications_csv}
+              onChange={handleChange}
+              placeholder="e.g. MBBS, M.D., MBA, M.D. General Medicine"
+              className="bg-slate-50/50 border-slate-200 focus:bg-white transition-colors"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="specialties_csv" className="text-slate-700 font-medium">Areas of Specialisation (comma-separated)</Label>
+            <Input
+              id="specialties_csv"
+              name="specialties_csv"
+              value={formData.specialties_csv}
+              onChange={handleChange}
+              placeholder="e.g. General Health Care, Diabetes Mellitus, Cardiac Care"
+              className="bg-slate-50/50 border-slate-200 focus:bg-white transition-colors"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="fellowships_csv" className="text-slate-700 font-medium">Fellowships / Diplomas (comma-separated)</Label>
+            <Input
+              id="fellowships_csv"
+              name="fellowships_csv"
+              value={formData.fellowships_csv}
+              onChange={handleChange}
+              placeholder="e.g. Fellowship in Practical Cardiology (IMA), PG Diploma in Infectious Diseases"
+              className="bg-slate-50/50 border-slate-200 focus:bg-white transition-colors"
+            />
+          </div>
+
+          <DialogFooter className="bg-slate-50 border-t border-slate-100 p-6 shrink-0 flex gap-2">
             <Button type="button" variant="outline" onClick={onClose} disabled={isPending} className="border-slate-200 hover:bg-slate-100 text-slate-700">
               Cancel
             </Button>

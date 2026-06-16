@@ -35,7 +35,33 @@ export const useMarkNotificationRead = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => notificationService.markAsRead(id),
-    onSuccess: () => {
+    onMutate: async (id: string) => {
+      await queryClient.cancelQueries({ queryKey: ['notifications'] });
+      
+      const previousNotificationsFalse = queryClient.getQueryData(['notifications', 'my', false]);
+      const previousNotificationsTrue = queryClient.getQueryData(['notifications', 'my', true]);
+
+      queryClient.setQueryData(['notifications', 'my', false], (old: any) => {
+        if (!old) return old;
+        return old.map((n: any) => n.id === id ? { ...n, is_read: true } : n);
+      });
+
+      queryClient.setQueryData(['notifications', 'my', true], (old: any) => {
+        if (!old) return old;
+        return old.filter((n: any) => n.id !== id);
+      });
+
+      return { previousNotificationsFalse, previousNotificationsTrue };
+    },
+    onError: (err, id, context) => {
+      if (context?.previousNotificationsFalse) {
+        queryClient.setQueryData(['notifications', 'my', false], context.previousNotificationsFalse);
+      }
+      if (context?.previousNotificationsTrue) {
+        queryClient.setQueryData(['notifications', 'my', true], context.previousNotificationsTrue);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });
@@ -45,7 +71,33 @@ export const useDeleteNotification = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (id: string) => notificationService.deleteNotification(id),
-    onSuccess: () => {
+    onMutate: async (id: string) => {
+      await queryClient.cancelQueries({ queryKey: ['notifications'] });
+      
+      const previousNotificationsFalse = queryClient.getQueryData(['notifications', 'my', false]);
+      const previousNotificationsTrue = queryClient.getQueryData(['notifications', 'my', true]);
+
+      queryClient.setQueryData(['notifications', 'my', false], (old: any) => {
+        if (!old) return old;
+        return old.filter((n: any) => n.id !== id);
+      });
+
+      queryClient.setQueryData(['notifications', 'my', true], (old: any) => {
+        if (!old) return old;
+        return old.filter((n: any) => n.id !== id);
+      });
+
+      return { previousNotificationsFalse, previousNotificationsTrue };
+    },
+    onError: (err, id, context) => {
+      if (context?.previousNotificationsFalse) {
+        queryClient.setQueryData(['notifications', 'my', false], context.previousNotificationsFalse);
+      }
+      if (context?.previousNotificationsTrue) {
+        queryClient.setQueryData(['notifications', 'my', true], context.previousNotificationsTrue);
+      }
+    },
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ['notifications'] });
     },
   });

@@ -224,6 +224,8 @@ class AuditLog(Base):
     entity_id = Column(UUID(as_uuid=True), nullable=False, index=True)
     details = Column(Text, nullable=True)
     timestamp = Column(DateTime(timezone=True), default=get_utc_now)
+    
+    user = relationship("User", foreign_keys=[user_id])
 
 class PatientDoctorMapping(Base):
     __tablename__ = "patient_doctor_mapping"

@@ -66,6 +66,34 @@ const getNextDateStr = (daysOffset: number) => {
   return d.toISOString().split('T')[0];
 };
 
+const formatTime12to24 = (timeStr: string): string => {
+  const clean = timeStr.trim().toUpperCase();
+  const match = clean.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/);
+  if (match) {
+    let hours = parseInt(match[1], 10);
+    const minutes = match[2];
+    const ampm = match[3];
+    if (ampm === 'PM' && hours < 12) hours += 12;
+    if (ampm === 'AM' && hours === 12) hours = 0;
+    return `${hours.toString().padStart(2, '0')}:${minutes}`;
+  }
+  return timeStr;
+};
+
+const formatTime24to12 = (timeStr: string): string => {
+  const clean = timeStr.trim();
+  const match = clean.match(/^(\d{2}):(\d{2})$/);
+  if (match) {
+    let hours = parseInt(match[1], 10);
+    const minutes = match[2];
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    return `${hours.toString().padStart(2, '0')}:${minutes} ${ampm}`;
+  }
+  return timeStr;
+};
+
 export default function FloatingContact() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [language, setLanguage] = useState<'en' | 'ta'>('en');
@@ -171,7 +199,7 @@ export default function FloatingContact() {
         id: msgId, 
         role: 'bot', 
         text: t.askTime,
-        options: ['10:00', '14:00', '18:00']
+        options: ['10:00 AM', '02:00 PM', '06:00 PM']
       };
     }
 
@@ -180,7 +208,8 @@ export default function FloatingContact() {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8009/api/v1';
         const docName = encodeURIComponent(bookingData.doctor_name || '');
         const dateVal = encodeURIComponent(bookingData.appointment_date || '');
-        const timeVal = encodeURIComponent(text);
+        const convertedTime = formatTime12to24(text);
+        const timeVal = encodeURIComponent(convertedTime);
         
         const res = await fetch(`${apiUrl}/appointments/public/check-availability?doctor_name=${docName}&date=${dateVal}&time=${timeVal}`);
         if (res.ok) {
@@ -192,7 +221,7 @@ export default function FloatingContact() {
               text: language === 'ta' 
                 ? 'மன்னிக்கவும், அந்த நேரத்தில் மருத்துவருக்கு வேறு முன்பதிவு உள்ளது. தயவுசெய்து வேறு நேரத்தை தேர்ந்தெடுக்கவும் (அல்லது தட்டச்சு செய்யவும்).' 
                 : 'Sorry, the doctor already has an appointment at that time. Please choose or type another time.',
-              options: ['10:00', '14:00', '18:00']
+              options: ['10:00 AM', '02:00 PM', '06:00 PM']
             };
           }
         }
@@ -200,7 +229,7 @@ export default function FloatingContact() {
         console.error("Availability check failed:", err);
       }
 
-      setBookingData((prev: any) => ({ ...prev, appointment_time: text }));
+      setBookingData((prev: any) => ({ ...prev, appointment_time: formatTime12to24(text) }));
       setChatState('booking_notes');
       return { id: msgId, role: 'bot', text: t.askNotes };
     }
@@ -222,7 +251,7 @@ export default function FloatingContact() {
           const successTxt = t.success
             .replace('{doc}', finalData.doctor_name)
             .replace('{date}', finalData.appointment_date)
-            .replace('{time}', finalData.appointment_time)
+            .replace('{time}', formatTime24to12(finalData.appointment_time))
             .replace('{phone}', finalData.phone);
           return { id: msgId, role: 'bot', text: successTxt, options: [t.optMenu] };
         } else {
@@ -291,7 +320,7 @@ export default function FloatingContact() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-4 font-sans">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end gap-3 sm:gap-4 font-sans max-w-[calc(100vw-32px)] sm:max-w-none">
       {/* Chatbot Window */}
       <AnimatePresence>
         {isChatOpen && (
@@ -300,7 +329,7 @@ export default function FloatingContact() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-            className="w-[340px] sm:w-[380px] bg-white rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)] border border-slate-100 overflow-hidden mb-2 flex flex-col"
+            className="w-[calc(100vw-32px)] sm:w-[380px] max-w-[380px] bg-white rounded-2xl shadow-[0_20px_50px_-12px_rgba(0,0,0,0.25)] border border-slate-100 overflow-hidden mb-2 flex flex-col"
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-teal-700 to-teal-500 p-4 text-white flex justify-between items-center shadow-md relative z-10">

@@ -410,15 +410,62 @@ class PrescriptionPDFGenerator:
     async def generate(self) -> bytes:
         html_content = self._build_html()
         
-        async with async_playwright() as p:
-            browser = await p.chromium.launch(headless=True)
-            page = await browser.new_page()
-            # Wait for fonts to load
-            await page.set_content(html_content, wait_until="networkidle")
-            pdf_bytes = await page.pdf(
-                format="A4", 
-                print_background=True, 
-                margin={"top": "0px", "bottom": "0px", "left": "0px", "right": "0px"}
-            )
-            await browser.close()
-            return pdf_bytes
+        import sys
+        if sys.platform != 'win32':
+            async with async_playwright() as p:
+                browser = await p.chromium.launch(headless=True)
+                page = await browser.new_page()
+                # Wait for fonts to load
+                await page.set_content(html_content, wait_until="networkidle")
+                pdf_bytes = await page.pdf(
+                    format="A4", 
+                    print_background=True, 
+                    margin={"top": "0px", "bottom": "0px", "left": "0px", "right": "0px"}
+                )
+                await browser.close()
+                return pdf_bytes
+                
+        # On Windows, we run it in a separate thread with ProactorEventLoop to support subprocesses under Uvicorn's SelectorEventLoop
+        import threading
+        import asyncio
+        
+        pdf_bytes_container = []
+        error_container = []
+        
+        def run_in_proactor_thread():
+            try:
+                # Force WindowsProactorEventLoopPolicy for this thread
+                asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                
+                async def runner():
+                    async with async_playwright() as p:
+                        browser = await p.chromium.launch(headless=True)
+                        page = await browser.new_page()
+                        await page.set_content(html_content, wait_until="networkidle")
+                        data = await page.pdf(
+                            format="A4", 
+                            print_background=True, 
+                            margin={"top": "0px", "bottom": "0px", "left": "0px", "right": "0px"}
+                        )
+                        await browser.close()
+                        return data
+                        
+                try:
+                    res = loop.run_until_complete(runner())
+                    pdf_bytes_container.append(res)
+                finally:
+                    loop.close()
+            except Exception as e:
+                error_container.append(e)
+                
+        thread = threading.Thread(target=run_in_proactor_thread)
+        thread.start()
+        # Wait for thread to finish
+        thread.join()
+        
+        if error_container:
+            raise error_container[0]
+            
+        return pdf_bytes_container[0]

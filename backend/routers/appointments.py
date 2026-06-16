@@ -138,11 +138,20 @@ async def create_public_appointment(
     if not appt_time_str:
         appt_time_str = "10:00"
 
+    try:
+        time_clean = appt_time_str.strip().lower().replace(' ', '')
+        if 'am' in time_clean or 'pm' in time_clean:
+            appt_time = datetime.strptime(appt_time_str.strip(), "%I:%M %p").time()
+        else:
+            appt_time = datetime.strptime(appt_time_str.strip(), "%H:%M").time()
+    except ValueError:
+        appt_time = time(10, 0)
+
     new_appt = Appointment(
         patient_id=patient.id,
         doctor_id=doctor.id,
         appointment_date=datetime.strptime(data.get("appointment_date"), "%Y-%m-%d").date(),
-        appointment_time=datetime.strptime(appt_time_str, "%H:%M").time(),
+        appointment_time=appt_time,
         status=AppointmentStatus.SCHEDULED,
         notes=data.get("notes")
     )

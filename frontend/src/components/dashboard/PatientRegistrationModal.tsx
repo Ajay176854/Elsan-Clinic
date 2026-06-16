@@ -4,13 +4,23 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
-import { useCreatePatient, useDoctors, useUser } from "../../hooks";
+import { useCreatePatient, useDoctors, useUser, usePatients } from "../../hooks";
 import { Loader2 } from "lucide-react";
+import { patientService } from "../../services";
 
-export function PatientRegistrationModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
+export function PatientRegistrationModal({ 
+  isOpen, 
+  onClose,
+  onSelectExistingPatient
+}: { 
+  isOpen: boolean; 
+  onClose: () => void;
+  onSelectExistingPatient?: (patientId: string) => void;
+}) {
   const { mutateAsync: createPatient, isPending } = useCreatePatient();
   const { data: doctors = [] } = useDoctors();
   const { data: user } = useUser();
+  const { data: patients = [] } = usePatients();
 
   const [formData, setFormData] = useState({
     full_name: '',
@@ -29,6 +39,9 @@ export function PatientRegistrationModal({ isOpen, onClose }: { isOpen: boolean,
     appointment_time: ''
   });
 
+  const [existingPatient, setExistingPatient] = useState<any | null>(null);
+  const [checkingPhone, setCheckingPhone] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
       const now = new Date();
@@ -36,11 +49,43 @@ export function PatientRegistrationModal({ isOpen, onClose }: { isOpen: boolean,
       const timeStr = now.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit' });
       setFormData(prev => ({
         ...prev,
+        phone: '',
         appointment_date: dateStr,
         appointment_time: timeStr
       }));
+      setExistingPatient(null);
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (!formData.phone || formData.phone.length < 8) {
+      setExistingPatient(null);
+      return;
+    }
+
+    const delayDebounce = setTimeout(async () => {
+      // First check local list
+      const localMatch = patients.find((p: any) => p.phone === formData.phone.trim());
+      if (localMatch) {
+        setExistingPatient(localMatch);
+        return;
+      }
+
+      // Query backend for exact search
+      setCheckingPhone(true);
+      try {
+        const results = await patientService.search(formData.phone.trim());
+        const match = results.find((p: any) => p.phone === formData.phone.trim());
+        setExistingPatient(match || null);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setCheckingPhone(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(delayDebounce);
+  }, [formData.phone, patients]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -52,6 +97,8 @@ export function PatientRegistrationModal({ isOpen, onClose }: { isOpen: boolean,
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (existingPatient) return;
+
     try {
       const payload: any = {
         ...formData,
@@ -73,6 +120,7 @@ export function PatientRegistrationModal({ isOpen, onClose }: { isOpen: boolean,
         allergies: '', current_symptoms: '', notes: '', doctor_id: '',
         appointment_date: '', appointment_time: ''
       });
+      setExistingPatient(null);
     } catch (error) {
       console.error("Failed to register patient", error);
     }
@@ -93,6 +141,33 @@ export function PatientRegistrationModal({ isOpen, onClose }: { isOpen: boolean,
             <div className="space-y-2">
               <Label htmlFor="phone">Phone Number *</Label>
               <Input id="phone" name="phone" required value={formData.phone} onChange={handleChange} />
+              {checkingPhone && (
+                <p className="text-xs text-slate-400 flex items-center gap-1">
+                  <Loader2 className="w-3 h-3 animate-spin" /> Checking phone number...
+                </p>
+              )}
+              {existingPatient && (
+                <div className="mt-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-amber-800 text-xs space-y-2">
+                  <p className="font-semibold flex items-center gap-1">
+                    ⚠️ Phone number already registered!
+                  </p>
+                  <p>
+                    This number is registered to <strong>{existingPatient.full_name}</strong> ({existingPatient.patient_code}).
+                    Please create a visit for this patient instead.
+                  </p>
+                  {onSelectExistingPatient && (
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => onSelectExistingPatient(existingPatient.id)}
+                      className="w-full bg-white hover:bg-amber-100 border-amber-300 text-amber-900 font-semibold mt-1"
+                    >
+                      Create Visit for {existingPatient.full_name}
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="age">Age *</Label>
@@ -163,7 +238,7 @@ export function PatientRegistrationModal({ isOpen, onClose }: { isOpen: boolean,
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
-            <Button type="submit" disabled={isPending} className="bg-blue-600 hover:bg-blue-700 text-white">
+            <Button type="submit" disabled={isPending || !!existingPatient} className="bg-blue-600 hover:bg-blue-700 text-white">
               {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Register
             </Button>

@@ -207,7 +207,7 @@ async def download_prescription_pdf(
         io.BytesIO(pdf_bytes), 
         media_type="application/pdf",
         headers={
-            "Content-Disposition": "attachment; filename=Elsan_Clinic_Prescription.pdf"
+            "Content-Disposition": "inline; filename=Elsan_Clinic_Prescription.pdf"
         }
     )
 

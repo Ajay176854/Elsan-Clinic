@@ -49,6 +49,7 @@ export default function ReceptionistDashboard({
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
   const [isVisitModalOpen, setIsVisitModalOpen] = useState(false);
   const [isAdmissionModalOpen, setIsAdmissionModalOpen] = useState(false);
+  const [selectedPatientForVisit, setSelectedPatientForVisit] = useState<string | null>(null);
   
   // Daily Visit Modal state
   const [dailyVisitModalState, setDailyVisitModalState] = useState<{isOpen: boolean, admissionId: string, patientName: string}>({
@@ -279,44 +280,15 @@ export default function ReceptionistDashboard({
                 <Users className="w-5 h-5 text-indigo-600" />
                 Active Clinic Queue (Today's Visits)
               </h3>
-              <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-full">
-                {activeClinicQueue.length} Waiting
+              <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-full border border-amber-200 flex items-center gap-1">
+                <AlertCircle size={12} />
+                Under Development
               </span>
             </div>
-            <div className="p-0">
-              {activeClinicQueue.length === 0 ? (
-                <div className="p-8 text-center text-slate-500">
-                  <Activity className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                  <p>No active visits currently in queue.</p>
-                </div>
-              ) : (
-                <div className="divide-y divide-slate-100">
-                  {activeClinicQueue.map((visit: any) => {
-                    const doctorName = doctors.find((d: any) => d.id === visit.doctor_id)?.full_name || visit.doctor_name || 'Unassigned';
-                    const patientName = patients.find((p: any) => p.id === visit.patient_id)?.full_name || visit.patient_name || 'Unknown Patient';
-                    return (
-                    <div key={visit.id} className="p-4 hover:bg-slate-50 transition-colors flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600 font-bold border border-indigo-100">
-                          {patientName.charAt(0).toUpperCase()}
-                        </div>
-                        <div>
-                          <p className="font-semibold text-slate-800">{patientName}</p>
-                          <div className="flex gap-2 items-center text-xs text-slate-500 mt-0.5">
-                            <span className="flex items-center gap-1"><Clock size={12} /> {formatTimeFromDate(visit.created_at)}</span>
-                            <span>•</span>
-                            <span className="font-medium text-slate-600">Dr. {doctorName}</span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="bg-blue-50 text-blue-700 text-xs font-semibold px-2.5 py-1 rounded-full border border-blue-100">In Queue</span>
-                        <ArrowRight size={18} className="text-slate-400" />
-                      </div>
-                    </div>
-                  )})}
-                </div>
-              )}
+            <div className="p-8 text-center text-slate-500">
+              <AlertCircle className="w-12 h-12 text-amber-500 mx-auto mb-3 animate-pulse" />
+              <p className="font-semibold text-slate-800 mb-1">Queue Tracking Under Development</p>
+              <p className="text-sm max-w-sm mx-auto">This section is currently under development and will be updated with live patient queue status soon.</p>
             </div>
           </div>
         </div>
@@ -426,11 +398,20 @@ export default function ReceptionistDashboard({
       <PatientRegistrationModal 
         isOpen={isRegistrationModalOpen} 
         onClose={() => setIsRegistrationModalOpen(false)} 
+        onSelectExistingPatient={(patientId) => {
+          setIsRegistrationModalOpen(false);
+          setSelectedPatientForVisit(patientId);
+          setIsVisitModalOpen(true);
+        }}
       />
 
       <VisitCreationModal
+        patientId={selectedPatientForVisit}
         isOpen={isVisitModalOpen}
-        onClose={() => setIsVisitModalOpen(false)}
+        onClose={() => {
+          setIsVisitModalOpen(false);
+          setSelectedPatientForVisit(null);
+        }}
       />
 
       <PatientAdmissionModal

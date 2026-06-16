@@ -2,6 +2,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import func, case, text
 from sqlalchemy.future import select
 from datetime import datetime, timezone
+from core.config import settings
 from models.domain import User, Doctor, Patient, Visit, Prescription, Appointment, WhatsAppLog, RoleEnum, WhatsAppStatus, AppointmentStatus
 
 class DashboardRepository:
@@ -49,11 +50,17 @@ class DashboardRepository:
 
     async def get_visit_stats(self, group_by: str = "day") -> list[tuple]:
         if group_by == "month":
-            # For SQLite, we can use strftime('%Y-%m', date)
-            stmt = select(
-                func.strftime('%Y-%m', Visit.created_at).label("date"),
-                func.count(Visit.id).label("count")
-            ).group_by(text("date")).order_by(text("date"))
+            # For PostgreSQL / SQLite support
+            if "postgresql" in settings.DATABASE_URL:
+                stmt = select(
+                    func.to_char(Visit.created_at, 'YYYY-MM').label("date"),
+                    func.count(Visit.id).label("count")
+                ).group_by(text("date")).order_by(text("date"))
+            else:
+                stmt = select(
+                    func.strftime('%Y-%m', Visit.created_at).label("date"),
+                    func.count(Visit.id).label("count")
+                ).group_by(text("date")).order_by(text("date"))
         else:
             stmt = select(
                 func.date(Visit.created_at).label("date"),

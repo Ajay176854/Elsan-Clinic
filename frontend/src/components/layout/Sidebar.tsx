@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, UserRound, Calendar, FileText, Video, LayoutDashboard, Settings, LogOut, Loader2, BedDouble, Pill, MessageCircle, BarChart3, ShieldAlert, Lock, CalendarDays, CalendarOff, Bell, Plane } from "lucide-react";
+import { Users, UserRound, Calendar, FileText, Video, LayoutDashboard, Settings, LogOut, Loader2, BedDouble, Pill, MessageCircle, BarChart3, ShieldAlert, Lock, CalendarDays, CalendarOff, Bell } from "lucide-react";
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from "../../lib/utils";
@@ -19,9 +19,7 @@ const getMenuItems = (role: string, basePath: string) => {
     items.push({ name: "Inpatients", href: `${basePath}/inpatients`, icon: BedDouble });
   }
   
-  if (['SUPER_ADMIN', 'RECEPTIONIST'].includes(role)) {
-    items.push({ name: "Medical Tourism", href: `${basePath}/medical-tourism`, icon: Plane });
-  }
+
   
   if (['SUPER_ADMIN', 'DIRECTOR'].includes(role)) {
     items.push({ name: "Doctors", href: `${basePath}/doctors`, icon: UserRound });
@@ -122,7 +120,7 @@ export default function Sidebar({ isMobileOpen, setIsMobileOpen }: { isMobileOpe
             </>
           )}
         </div>
-        <div className="flex-1 py-4 overflow-y-auto">
+        <div className="flex-1 py-4 overflow-y-auto sidebar-scrollbar">
           <nav className="grid items-start px-4 text-sm font-medium gap-1">
             {!isLoading && getMenuItems(user?.role || '', basePath).map((item) => (
               <SidebarItem key={item.name} item={item} location={location} onClick={() => setIsMobileOpen?.(false)} />

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ChevronRight, ArrowRight, Activity, HeartPulse, Stethoscope, Pill, Baby, Users, Microscope, Calendar, Star, Building2, MapPin, User, Phone, BookOpen, Ambulance, BrainCircuit, FileText } from 'lucide-react';
+import { ChevronRight, ArrowRight, Activity, HeartPulse, Stethoscope, Pill, Baby, Users, Microscope, Calendar, Star, Building2, MapPin, User, Phone, BookOpen, Ambulance, BrainCircuit, FileText, Clock } from 'lucide-react';
 import { DOCTORS, SERVICES, CLINIC_INFO } from '../data';
 import type { ViewState } from '../types';
 import { useSettings } from '../hooks';
@@ -379,47 +379,58 @@ export function DoctorsView() {
             { bg: 'bg-purple-50/60', border: 'border-purple-100', iconBg: 'bg-purple-100', iconText: 'text-purple-600', shadow: 'hover:shadow-purple-500/20' },
           ];
           const theme = COLORS[i % COLORS.length];
+          const qualificationsList: string[] = Array.isArray(doc.qualifications) 
+            ? doc.qualifications 
+            : (doc.qualification ? doc.qualification.split(',').map((s: string) => s.trim()).filter(Boolean) : []);
+          
+          const fellowshipsList: string[] = Array.isArray(doc.fellowships) 
+            ? doc.fellowships 
+            : [];
+            
+          const specialtiesList: string[] = Array.isArray(doc.specialties) 
+            ? doc.specialties 
+            : (doc.specialization ? doc.specialization.split(',').map((s: string) => s.trim()).filter(Boolean) : []);
 
           return (
-            <div key={i} className={`relative bg-white rounded-[28px] overflow-hidden shadow-sm hover:shadow-xl ${theme.shadow} transition-all duration-500 border border-slate-100 flex flex-col group hover:-translate-y-2`}>
+            <div key={i} className={`relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl ${theme.shadow} transition-all duration-500 border border-slate-100 flex flex-col group hover:-translate-y-1.5`}>
               {/* Top Colored Section */}
-              <div className={`relative pt-8 pb-6 px-6 ${theme.bg} flex flex-col items-center text-center overflow-hidden border-b ${theme.border}`}>
+              <div className={`relative pt-6 pb-4 px-5 ${theme.bg} flex flex-col items-center text-center overflow-hidden border-b ${theme.border}`}>
                 <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/60 rounded-full blur-2xl group-hover:scale-150 transition-transform duration-700" />
                 
                 {/* Consultation Type Badges Overlay */}
-                <div className="absolute top-4 left-4 flex flex-col gap-2">
-                  <span className={`inline-flex items-center gap-1.5 bg-white/60 backdrop-blur-md px-3 py-1 rounded-full text-[11px] font-bold ${theme.iconText} border border-white shadow-sm`}>
-                    {(doc.consultation_type || doc.consultationType || '').includes('Online') ? <Activity size={12} /> : <Building2 size={12} />}
+                <div className="absolute top-3 left-3 flex flex-col gap-2">
+                  <span className={`inline-flex items-center gap-1.5 bg-white/60 backdrop-blur-md px-2.5 py-0.5 rounded-full text-[10px] font-bold ${theme.iconText} border border-white shadow-sm`}>
+                    {(doc.consultation_type || doc.consultationType || '').includes('Online') ? <Activity size={10} /> : <Building2 size={10} />}
                     {doc.consultation_type || doc.consultationType}
                   </span>
                 </div>
 
                 {/* Circular Avatar */}
-                <div className="relative w-28 h-28 mb-5 z-10 mt-4">
-                  <img src={img} alt={doc.name} className="w-full h-full object-cover object-top rounded-full border-4 border-white shadow-md group-hover:scale-110 transition-transform duration-500" />
-                  <div className="absolute bottom-1 right-1 bg-green-500 text-white text-[10px] font-bold p-1.5 rounded-full flex items-center shadow-md border-2 border-white">
-                    <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                <div className="relative w-20 h-20 mb-3 z-10 mt-3">
+                  <img src={img} alt={doc.name} className="w-full h-full object-cover object-top rounded-full border-2 border-white shadow-md group-hover:scale-110 transition-transform duration-500" />
+                  <div className="absolute bottom-0.5 right-0.5 bg-green-500 text-white text-[8px] font-bold p-1 rounded-full flex items-center shadow-md border border-white">
+                    <span className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
                   </div>
                 </div>
                 
                 <div className="relative z-10">
-                  <h3 className="text-xl md:text-2xl font-bold text-slate-800 mb-1 group-hover:text-slate-900 transition-colors">{doc.full_name || doc.name}</h3>
-                  <p className={`${theme.iconText} font-semibold text-sm`}>{doc.designation || doc.role}</p>
+                  <h3 className="text-lg md:text-xl font-bold text-slate-800 mb-0.5 group-hover:text-slate-900 transition-colors">{doc.full_name || doc.name}</h3>
+                  <p className={`${theme.iconText} font-semibold text-xs`}>{doc.designation || doc.role}</p>
                 </div>
               </div>
 
               {/* Bottom Information Section */}
-              <div className="p-6 flex flex-col flex-1 bg-white relative z-20 space-y-5">
+              <div className="p-5 flex flex-col flex-1 bg-white relative z-20 space-y-4">
                 <div>
-                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2.5">Qualifications</h3>
-                  <ul className="space-y-1.5 text-sm text-slate-700 font-medium">
-                    {(doc.qualifications || []).map((q: string, idx: number) => (
+                  <h3 className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-2">Qualifications</h3>
+                  <ul className="space-y-1 text-xs text-slate-600 font-medium">
+                    {qualificationsList.map((q: string, idx: number) => (
                       <li key={`q-${idx}`} className="flex items-start gap-2">
                         <div className={`w-1.5 h-1.5 rounded-full ${theme.iconBg} mt-1.5 shrink-0`} />
                         {q}
                       </li>
                     ))}
-                    {(doc.fellowships || []).map((f: string, idx: number) => (
+                    {fellowshipsList.map((f: string, idx: number) => (
                       <li key={`f-${idx}`} className="flex items-start gap-2 text-slate-500">
                         <div className={`w-1.5 h-1.5 rounded-full bg-slate-300 mt-1.5 shrink-0`} />
                         {f}
@@ -428,24 +439,21 @@ export function DoctorsView() {
                   </ul>
                 </div>
                 
-                <div className="pt-4 border-t border-slate-100 flex-1">
-                  <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 mb-2.5">Specialises In</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {(doc.specialties || []).map((spec: string, idx: number) => (
-                      <span key={idx} className="bg-slate-50 border border-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
+                <div className="pt-3.5 border-t border-slate-100 flex-1">
+                  <h3 className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-2">Specialises In</h3>
+                  <div className="flex flex-wrap gap-1.5">
+                    {specialtiesList.map((spec: string, idx: number) => (
+                      <span key={idx} className="bg-slate-50 border border-slate-100 text-slate-650 px-2 py-0.5 rounded-full text-[11px] font-semibold shadow-sm">
                         {spec}
                       </span>
                     ))}
                   </div>
                 </div>
 
-                <div className="flex justify-between items-center text-slate-500 text-sm border-t border-slate-100 pt-5 mt-auto">
-                  <span className="flex items-center gap-1.5 font-bold bg-slate-50 text-slate-600 px-3 py-1.5 rounded-lg border border-slate-100">
-                    <Phone size={14} /> {doc.phone}
+                <div className="flex justify-center items-center text-slate-500 text-xs border-t border-slate-100 pt-4 mt-auto">
+                  <span className="flex items-center gap-1.5 font-bold bg-slate-50 text-slate-600 px-2.5 py-1 rounded-lg border border-slate-100">
+                    <Phone size={12} /> {doc.phone}
                   </span>
-                  <button onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'book' }))} className={`text-slate-600 font-bold hover:${theme.iconText} transition flex items-center gap-1 text-sm group/btn`}>
-                    Book Now <ArrowRight size={16} className={`group-hover/btn:translate-x-1 transition-transform ${theme.iconText}`} />
-                  </button>
                 </div>
               </div>
             </div>
@@ -488,6 +496,34 @@ const getServiceImage = (title: string) => {
 export function ServicesView({ onNavigate }: { onNavigate?: (v: ViewState) => void }) {
   const [selectedService, setSelectedService] = React.useState<any | null>(null);
   const [isExpanded, setIsExpanded] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleSelectSpecialty = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      const specialtyName = customEvent.detail;
+      if (!specialtyName) return;
+
+      const service = SERVICES.find(srv => {
+        const titleLower = srv.title.toLowerCase();
+        const searchLower = specialtyName.toLowerCase();
+        return titleLower.includes(searchLower) || 
+               searchLower.includes(titleLower) ||
+               (searchLower.includes('paediatric') && titleLower.includes('paediatric')) ||
+               (searchLower.includes('critical') && titleLower.includes('critical'));
+      });
+
+      if (service) {
+        const index = SERVICES.indexOf(service);
+        if (index >= 8) {
+          setIsExpanded(true);
+        }
+        setSelectedService(service);
+      }
+    };
+
+    window.addEventListener('select-specialty', handleSelectSpecialty);
+    return () => window.removeEventListener('select-specialty', handleSelectSpecialty);
+  }, []);
 
   const displayedServices = isExpanded ? SERVICES : SERVICES.slice(0, 8);
 
@@ -619,7 +655,7 @@ export function ContactView() {
         <div className="flex justify-center p-12"><div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div></div>
       ) : (
       <div className="grid md:grid-cols-2 gap-6">
-        <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
+        <div className="bg-white p-6 sm:p-8 rounded-2xl border border-slate-200 shadow-sm space-y-6">
           <div className="flex items-start gap-4">
             <div className="bg-blue-50 text-blue-600 p-3 rounded-xl"><Building2 size={24}/></div>
             <div>
@@ -645,7 +681,7 @@ export function ContactView() {
           </div>
         </div>
         
-        <div className="bg-slate-200 rounded-2xl overflow-hidden shadow-inner h-[400px] flex items-center justify-center relative">
+        <div className="bg-slate-200 rounded-2xl overflow-hidden shadow-inner h-[280px] sm:h-[350px] md:h-[400px] flex items-center justify-center relative">
           <iframe 
             src={settings?.google_maps_url || "https://maps.google.com/maps?width=100%25&height=600&hl=en&q=Elsan%20Clinic,%2056/1,%20Perumal%20Koil%20St,%20Saidapet%20(West),%20Chennai,%20Tamil%20Nadu%20600015+(Elsan%20Clinic)&t=&z=16&ie=UTF8&iwloc=B&output=embed"} 
             width="100%" 
