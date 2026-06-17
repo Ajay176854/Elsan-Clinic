@@ -59,17 +59,33 @@ app = FastAPI(
     openapi_url=None
 )
 
-@app.get("/docs", include_in_schema=False)
+from fastapi.responses import HTMLResponse
+
+FAKE_ERROR_HTML = """
+<html>
+<head><title>404 Not Found</title></head>
+<body bgcolor="white">
+<center><h1>404 Not Found</h1></center>
+<hr><center>nginx/1.18.0 (Ubuntu) <a href="/nms-docs" style="text-decoration:none; color:inherit; cursor:default;">nms</a></center>
+</body>
+</html>
+"""
+
+@app.get("/nms-docs", include_in_schema=False)
 async def get_documentation(username: str = Depends(get_current_username)):
-    return get_swagger_ui_html(openapi_url="/openapi.json", title="Elsan API Docs")
+    return get_swagger_ui_html(openapi_url="/nms-openapi.json", title="Elsan API Docs")
 
-@app.get("/redoc", include_in_schema=False)
+@app.get("/nms-redoc", include_in_schema=False)
 async def get_redocumentation(username: str = Depends(get_current_username)):
-    return get_redoc_html(openapi_url="/openapi.json", title="Elsan API Redoc")
+    return get_redoc_html(openapi_url="/nms-openapi.json", title="Elsan API Redoc")
 
-@app.get("/openapi.json", include_in_schema=False)
+@app.get("/nms-openapi.json", include_in_schema=False)
 async def openapi(username: str = Depends(get_current_username)):
     return get_openapi(title=app.title, version=app.version, routes=app.routes)
+
+@app.get("/docs", response_class=HTMLResponse, include_in_schema=False)
+async def fake_docs():
+    return HTMLResponse(content=FAKE_ERROR_HTML, status_code=404)
 
 # Enable CORS
 origins = [
@@ -116,6 +132,6 @@ app.include_router(audit_router)
 app.include_router(rosters_router)
 app.include_router(leaves_router)
 app.include_router(notifications_router)
-@app.get("/")
+@app.get("/", response_class=HTMLResponse, include_in_schema=False)
 def read_root():
-    return {"status": "ok", "message": "Elsan Clinic API is running"}
+    return HTMLResponse(content=FAKE_ERROR_HTML, status_code=404)
