@@ -20,7 +20,7 @@ export const DOCTORS: Doctor[] = [
     phone: "9444184977",
     consultationType: "In-Clinic",
     specialties: ["General Health Care", "Diabetes Mellitus", "Systemic Hypertension", "Skin Disease", "Asthma", "Acute Illness Treatment", "Speciality Care & Referrals", "Lifestyle & Preventive Counselling", "Geriatric Care"],
-    imageUrl: "/doctors/doctor_3.jpg"
+    imageUrl: "https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=400&q=80"
   },
   {
     id: "dr_meena",
@@ -31,7 +31,7 @@ export const DOCTORS: Doctor[] = [
     phone: "7824051677",
     consultationType: "Online Consultation Only",
     specialties: ["Cardiac Care", "Infectious Disease", "Geriatric Care", "Evidence Based Medicine", "Endocrinological Disorders", "Emergencies", "Telemedicine", "AI in Healthcare"],
-    imageUrl: "/doctors/doctor_2.jpg"
+    imageUrl: "https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80"
   },
   {
     id: "dr_ramya",
@@ -42,7 +42,7 @@ export const DOCTORS: Doctor[] = [
     phone: "9962663033",
     consultationType: "Online Consultation Only",
     specialties: ["Cardiac Care", "Infectious Disease", "Geriatric Care", "Evidence Based Medicine", "Endocrinological Disorders", "Emergencies", "Telemedicine", "AI in Healthcare"],
-    imageUrl: "/doctors/doctor_4.jpg"
+    imageUrl: "https://images.unsplash.com/photo-1594824436998-058b231b6855?w=400&q=80"
   },
   {
     id: "dr_sambath",
@@ -53,7 +53,7 @@ export const DOCTORS: Doctor[] = [
     phone: "8220246025",
     consultationType: "In-Clinic",
     specialties: ["Vaccinations", "Newborn Care", "Nutrition", "Growth & Development Monitoring", "General Paediatric Care", "Behavioural Health", "Seasonal Health Tips & Preventive Guidance"],
-    imageUrl: "/doctors/doctor_1.jpg"
+    imageUrl: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&q=80"
   }
 ];
 

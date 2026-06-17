@@ -21,7 +21,7 @@ export const AuroraBackground = ({
       )}
       {...props}
     >
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div
           className={cn(
             "absolute -inset-[10px] opacity-50 will-change-transform pointer-events-none aurora-bg",

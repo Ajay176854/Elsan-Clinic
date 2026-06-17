@@ -6,9 +6,19 @@ import { Stethoscope, Clock, FileText, User, Pill, Phone, BrainCircuit, Activity
 import { AnimatePresence } from 'framer-motion';
 import { CLINIC_INFO, SERVICES } from '../data';
 import Link from 'next/link';
-import { DoctorsView, ServicesView, ContactView, BookView } from '../components/PublicViews';
-import { HealthPackagesView, EmergencyView, HealthLibraryView } from '../components/ApolloViews';
-import AIToolsView from '../components/AIToolsView';
+import dynamic from 'next/dynamic';
+
+const DoctorsView = dynamic(() => import('../components/PublicViews').then(mod => mod.DoctorsView), { ssr: false });
+const ServicesView = dynamic(() => import('../components/PublicViews').then(mod => mod.ServicesView), { ssr: false });
+const ContactView = dynamic(() => import('../components/PublicViews').then(mod => mod.ContactView), { ssr: false });
+const BookView = dynamic(() => import('../components/PublicViews').then(mod => mod.BookView), { ssr: false });
+
+const HealthPackagesView = dynamic(() => import('../components/ApolloViews').then(mod => mod.HealthPackagesView), { ssr: false });
+const EmergencyView = dynamic(() => import('../components/ApolloViews').then(mod => mod.EmergencyView), { ssr: false });
+const HealthLibraryView = dynamic(() => import('../components/ApolloViews').then(mod => mod.HealthLibraryView), { ssr: false });
+
+const AIToolsView = dynamic(() => import('../components/AIToolsView'), { ssr: false });
+
 import { AuroraBackground } from '@/components/ui/aurora-background';
 import HeroWidgets from '@/components/HeroWidgets';
 import FloatingContact from '@/components/FloatingContact';
@@ -17,6 +27,8 @@ import { useRouter } from 'next/navigation';
 
 function HeroVideoCarousel({ setActiveTab }: { setActiveTab: (tab: string) => void }) {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [loadedSlides, setLoadedSlides] = useState<number[]>([0]);
+  
   const slides = [
     {
       videoUrl: "/video3.mp4?v=3",
@@ -41,20 +53,34 @@ function HeroVideoCarousel({ setActiveTab }: { setActiveTab: (tab: string) => vo
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   useEffect(() => {
+    // Pre-buffer the second video shortly after initial load to keep LCP fast
+    const preloadTimer = setTimeout(() => {
+      setLoadedSlides(prev => prev.includes(1) ? prev : [...prev, 1]);
+    }, 2000);
+
     const timer = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % slides.length);
+      setCurrentSlide(prev => {
+        const next = (prev + 1) % slides.length;
+        const nextNext = (next + 1) % slides.length;
+        // Pre-buffer the slide AFTER the next one well in advance
+        setLoadedSlides(loaded => loaded.includes(nextNext) ? loaded : [...loaded, nextNext]);
+        return next;
+      });
     }, 6000);
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      clearTimeout(preloadTimer);
+    };
   }, [slides.length]);
 
   useEffect(() => {
     videoRefs.current.forEach((video, index) => {
       if (!video) return;
       if (index === currentSlide) {
-        // Play the active video
+        // Play the active video immediately
         video.play().catch(() => {});
       } else {
-        // Pause inactive videos after the fade transition completes (1000ms)
+        // Pause inactive videos smoothly after fade
         setTimeout(() => {
            video.pause();
         }, 1000);
@@ -66,14 +92,15 @@ function HeroVideoCarousel({ setActiveTab }: { setActiveTab: (tab: string) => vo
     <div className="relative overflow-hidden w-full h-[calc(100vh-68px)] sm:h-[calc(100dvh-68px)] min-h-[560px] sm:min-h-[500px] md:min-h-0">
       {slides.map((slide, index) => (
         <div key={index} className={`absolute inset-0 transition-opacity duration-1000 bg-slate-900 ${index === currentSlide ? 'opacity-100 z-0' : 'opacity-0 -z-10'}`}>
-          <video 
+          <video
             ref={el => { videoRefs.current[index] = el; }}
-            src={slide.videoUrl} 
-            poster={slide.posterUrl} 
-            muted 
-            loop 
-            playsInline 
-            className="absolute inset-0 w-full h-full object-cover object-center" 
+            src={loadedSlides.includes(index) ? slide.videoUrl : undefined}
+            poster={slide.posterUrl}
+            muted
+            loop
+            playsInline
+            preload={loadedSlides.includes(index) ? "auto" : "none"}
+            className="absolute inset-0 w-full h-full object-cover object-center"
           />
           <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent pointer-events-none" />
         </div>
@@ -104,7 +131,7 @@ function HeroVideoCarousel({ setActiveTab }: { setActiveTab: (tab: string) => vo
             window.open(`${CLINIC_INFO.whatsapp}?text=${encodeURIComponent(text)}`, "_blank");
           }} className="bg-[#25D366] hover:bg-[#1EBE5A] text-white font-semibold flex items-center justify-center gap-2 px-4 py-2.5 sm:px-6 sm:py-3.5 md:px-8 md:py-4 rounded-lg shadow-lg hover:shadow-xl hover:-translate-y-1 active:scale-95 transition-all duration-300 text-xs sm:text-sm md:text-base w-full sm:w-auto shrink-0">
             <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2500/svg">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z" />
             </svg>
             WhatsApp Us
           </button>
@@ -148,7 +175,7 @@ export default function LandingPage() {
     }
 
     setActiveTabState(tab);
-    
+
     if (tab === 'home') {
       if (lenis) {
         lenis.scrollTo(0, { duration: 1.5 });
@@ -157,7 +184,7 @@ export default function LandingPage() {
       }
       return;
     }
-    
+
     const element = document.getElementById(tab);
     if (element) {
       if (lenis) {
@@ -373,7 +400,7 @@ export default function LandingPage() {
                   <p className="text-slate-500 text-base font-sans font-light leading-relaxed">
                     We combine world-class medical expertise with genuine care for each patient — because your wellbeing is more than just a diagnosis.
                   </p>
-                  
+
                   <div className="space-y-4 pt-4">
                     <div className="flex gap-3 items-start">
                       <div className="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center shrink-0">
@@ -404,9 +431,9 @@ export default function LandingPage() {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="relative">
-                   <HeroWidgets />
+                  <HeroWidgets />
                 </div>
               </div>
             </section>
@@ -434,23 +461,23 @@ export default function LandingPage() {
                   </ul>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80" alt="Doctor Consultation" className="rounded-2xl shadow-md w-full h-48 md:h-64 object-cover" />
-                  <img src="https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=400&q=80" alt="Modern Clinic" className="rounded-2xl shadow-md w-full h-48 md:h-64 object-cover mt-8" />
+                  <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400&q=80" alt="Doctor Consultation" className="rounded-2xl shadow-md w-full h-48 md:h-64 object-cover" loading="lazy" />
+                  <img src="https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=400&q=80" alt="Modern Clinic" className="rounded-2xl shadow-md w-full h-48 md:h-64 object-cover mt-8" loading="lazy" />
                 </div>
               </div>
             </section>
 
           </motion.div>
         </div>
-        
+
         <div id="treatments" className="scroll-mt-24 pt-10 border-t border-slate-200">
           <ServicesView onNavigate={() => setActiveTab('book')} />
         </div>
-        
+
         <div id="doctors" className="scroll-mt-24 pt-10 border-t border-slate-200">
           <DoctorsView />
         </div>
-        
+
 
         <div id="aitools" className="scroll-mt-24 pt-10 border-t border-slate-200">
           <AIToolsView />
@@ -483,9 +510,9 @@ export default function LandingPage() {
               </div>
               <p className="text-sm leading-relaxed">Part of Elsan Foundation.<br />{CLINIC_INFO.tagline}</p>
               <div className="flex gap-3 pt-2">
-                <a href="#" aria-label="Facebook" className="w-9 h-9 bg-slate-800 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-colors"><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>
-                <a href="#" aria-label="Instagram" className="w-9 h-9 bg-slate-800 hover:bg-pink-600 rounded-lg flex items-center justify-center transition-colors"><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></a>
-                <a href="#" aria-label="YouTube" className="w-9 h-9 bg-slate-800 hover:bg-red-600 rounded-lg flex items-center justify-center transition-colors"><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></a>
+                <a href="#" aria-label="Facebook" className="w-9 h-9 bg-slate-800 hover:bg-blue-600 rounded-lg flex items-center justify-center transition-colors"><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" /></svg></a>
+                <a href="#" aria-label="Instagram" className="w-9 h-9 bg-slate-800 hover:bg-pink-600 rounded-lg flex items-center justify-center transition-colors"><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" /></svg></a>
+                <a href="#" aria-label="YouTube" className="w-9 h-9 bg-slate-800 hover:bg-red-600 rounded-lg flex items-center justify-center transition-colors"><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" /></svg></a>
               </div>
             </div>
             <div>

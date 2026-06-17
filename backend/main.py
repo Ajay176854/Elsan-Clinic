@@ -31,7 +31,45 @@ async def lifespan(app: FastAPI):
     # Shutdown: Cancel the task
     task.cancel()
 
-app = FastAPI(title="Elsan Clinic Backend API", version="1.0.0", lifespan=lifespan)
+from fastapi.security import HTTPBasic, HTTPBasicCredentials
+from fastapi import Depends, HTTPException, status
+import secrets
+from fastapi.openapi.docs import get_swagger_ui_html, get_redoc_html
+from fastapi.openapi.utils import get_openapi
+
+security = HTTPBasic()
+
+def get_current_username(credentials: HTTPBasicCredentials = Depends(security)):
+    correct_username = secrets.compare_digest(credentials.username, "elsan_api")
+    correct_password = secrets.compare_digest(credentials.password, settings.SECRET_KEY[:16])
+    if not (correct_username and correct_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Basic"},
+        )
+    return credentials.username
+
+app = FastAPI(
+    title="Elsan Clinic Backend API", 
+    version="1.0.0", 
+    lifespan=lifespan,
+    docs_url=None, 
+    redoc_url=None, 
+    openapi_url=None
+)
+
+@app.get("/docs", include_in_schema=False)
+async def get_documentation(username: str = Depends(get_current_username)):
+    return get_swagger_ui_html(openapi_url="/openapi.json", title="Elsan API Docs")
+
+@app.get("/redoc", include_in_schema=False)
+async def get_redocumentation(username: str = Depends(get_current_username)):
+    return get_redoc_html(openapi_url="/openapi.json", title="Elsan API Redoc")
+
+@app.get("/openapi.json", include_in_schema=False)
+async def openapi(username: str = Depends(get_current_username)):
+    return get_openapi(title=app.title, version=app.version, routes=app.routes)
 
 # Enable CORS
 origins = [
@@ -49,6 +87,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+from fastapi import Request
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
 
 # Include Routers
 app.include_router(auth_router)

@@ -143,7 +143,6 @@ body {
   }
   html {
     @apply font-sans;
-    scroll-behavior: smooth;
   }
 }
 
@@ -182,8 +181,6 @@ body {
     background-image: var(--white-gradient), var(--aurora);
     background-size: 200% 100%;
     animation: aurora 60s linear infinite;
-    background-attachment: fixed;
-    mix-blend-mode: difference;
   }
 
   .dark .aurora-bg::after {

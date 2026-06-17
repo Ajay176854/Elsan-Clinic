@@ -367,7 +367,7 @@ export default function FloatingContact() {
             {/* Chat Area */}
             <div 
               ref={chatRef}
-              className="h-[380px] bg-slate-50 p-4 flex flex-col gap-4 overflow-y-auto scroll-smooth"
+              className="h-[60vh] max-h-[350px] sm:h-[380px] sm:max-h-none bg-slate-50 p-4 flex flex-col gap-4 overflow-y-auto scroll-smooth"
             >
               {messages.map((msg) => (
                 <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'} max-w-full`}>
