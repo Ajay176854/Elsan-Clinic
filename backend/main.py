@@ -59,6 +59,17 @@ app = FastAPI(
     openapi_url=None
 )
 
+import logging
+from fastapi.responses import JSONResponse
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logging.error(f"Unhandled server error: {exc}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error"}
+    )
+
 from fastapi.responses import HTMLResponse
 
 FAKE_ERROR_HTML = """
@@ -109,7 +120,6 @@ origins = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:[0-9]+)?|https?://(.*\.)?elsanpublichealth\.com",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
