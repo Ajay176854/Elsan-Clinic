@@ -61,6 +61,7 @@ app = FastAPI(
 
 import logging
 from fastapi.responses import JSONResponse
+from fastapi import Request
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
